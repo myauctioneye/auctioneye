@@ -299,7 +299,7 @@ nav{background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;height:
         <div class="action-sub">Get more analyses & features</div>
       </div>
     </div>
-    <a class="action-card" href="mailto:myauctioneye@gmail.com">
+    <a class="action-card" href="#" onclick="openSupport(); return false;">
       <div class="action-icon ai-amber">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="10" rx="2" stroke="#BA7517" stroke-width="1.5"/><path d="M3 7 L10 12 L17 7" stroke="#BA7517" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
@@ -496,7 +496,10 @@ function renderCurrentPlan(){
   });
 }
 
-function openUpgrade(){ document.getElementById('upgrade-modal').classList.add('show'); }
+function openUpgrade(){ 
+  const modal = document.getElementById('upgrade-modal');
+  if(modal) { modal.classList.add('show'); }
+}
 function closeUpgrade(){ document.getElementById('upgrade-modal').classList.remove('show'); }
 
 const STRIPE_LINKS = {
@@ -512,7 +515,8 @@ function selectPlan(plan){
   }
   const link = STRIPE_LINKS[plan];
   if(link){
-    window.location.href = link + '?prefilled_email=' + encodeURIComponent(currentUser?.email || '');
+    const email = currentUser?.email || '';
+    window.location.href = link + '?prefilled_email=' + encodeURIComponent(email) + '&client_reference_id=' + encodeURIComponent(email);
   }
 }
 
@@ -629,6 +633,40 @@ function reanalyze(vin){
   <div style="background:#fff;border-radius:14px;padding:2rem;width:100%;max-width:520px;margin:auto;position:relative;">
     <button onclick="closeReport()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:#868E96;">×</button>
     <div id="report-content"></div>
+  </div>
+</div>
+
+<!-- SUPPORT MODAL -->
+<div id="support-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#fff;border-radius:14px;padding:2rem;width:100%;max-width:460px;position:relative;">
+    <button onclick="closeSupport()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:#868E96;">×</button>
+    <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;">Contact Support</h2>
+    <p style="font-size:14px;color:#868E96;margin-bottom:1.25rem;">We'll get back to you within 24 hours.</p>
+    <div id="support-success" style="background:#E1F5EE;color:#0F6E56;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:none;">Message sent! We'll be in touch soon.</div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:12px;font-weight:600;color:#495057;display:block;margin-bottom:4px;">Your name</label>
+      <input id="support-name" type="text" placeholder="Your name" style="width:100%;padding:10px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;box-sizing:border-box;" />
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:12px;font-weight:600;color:#495057;display:block;margin-bottom:4px;">Email</label>
+      <input id="support-email" type="email" placeholder="your@email.com" style="width:100%;padding:10px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;box-sizing:border-box;" />
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:12px;font-weight:600;color:#495057;display:block;margin-bottom:4px;">Subject</label>
+      <select id="support-subject" style="width:100%;padding:10px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;box-sizing:border-box;appearance:none;background:#fff;">
+        <option>Billing issue</option>
+        <option>Plan upgrade / downgrade</option>
+        <option>Technical problem</option>
+        <option>Feature request</option>
+        <option>Account issue</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px;font-weight:600;color:#495057;display:block;margin-bottom:4px;">Describe your issue</label>
+      <textarea id="support-message" placeholder="Tell us what's happening..." rows="4" style="width:100%;padding:10px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;box-sizing:border-box;resize:vertical;"></textarea>
+    </div>
+    <button onclick="sendSupport()" id="support-btn" style="width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;">Send message</button>
   </div>
 </div>
 </body>
