@@ -305,8 +305,8 @@ footer{text-align:center;padding:2rem;font-size:12px;color:var(--gray-400);borde
     <div class="field"><div class="field-label">Title type</div>
       <select id="title-type"><option>Clean</option><option>Salvage</option><option>Rebuilt</option><option>Parts only</option><option>Certificate of destruction</option></select>
     </div>
-    <div class="field"><div class="field-label">Primary damage</div>
-      <select id="damage"><option>Front end</option><option>Rear end</option><option>Side</option><option>Rollover</option><option>Flood / water</option><option>Fire</option><option>Hail</option><option>Mechanical</option><option>Minor dents / scratches</option></select>
+    <div class="field"><div class="field-label">Primary damage <span style="font-size:11px;color:var(--gray-400);">optional</span></div>
+      <select id="damage"><option value="">Not specified</option><option>Front end</option><option>Rear end</option><option>Side</option><option>Rollover</option><option>Flood / water</option><option>Fire</option><option>Hail</option><option>Mechanical</option><option>Minor dents / scratches</option></select>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div class="field"><div class="field-label">Your bid ($)</div><input type="number" id="bid" value="3000" min="0"/></div>
@@ -718,7 +718,7 @@ async function analyze(){
   const total=bid+fees+repair+transport;
   const margin=market-total;
   const roi=(margin/total)*100;
-  const dr=dmgRisk[damage]||2;
+  const dr=damage ? (dmgRisk[damage]||2) : 0;
   const tr=titleRisk[titleType]||0;
   const riskScore=dr+tr+(margin<0?3:0)+(roi>0&&roi<10?1:0);
 
@@ -740,7 +740,7 @@ async function analyze(){
   document.getElementById('m-roi').textContent=fmtP(roi);
   document.getElementById('m-roi').className='metric-value c-'+mc;
 
-  document.getElementById('breakdown').innerHTML=[['Vehicle',`${vData.year} ${vData.make} ${vData.model}`],['VIN',vData.vin],['Source',source],['Damage',damage],['Title',titleType],['Bid',fmt(bid)],['Auction fees (~12%)',fmt(fees)],['Repair estimate',fmt(repair)],['Transport',fmt(transport)],['Total cost',fmt(total)],['Market value',fmt(market)],['Potential margin',fmt(margin)]].map(([k,v])=>`<div class="info-row"><span class="info-key">${k}</span><span class="info-val">${v}</span></div>`).join('');
+  document.getElementById('breakdown').innerHTML=[['Vehicle',`${vData.year} ${vData.make} ${vData.model}`],['VIN',vData.vin],['Damage',damage],['Title',titleType],['Bid',fmt(bid)],['Auction fees (~12%)',fmt(fees)],['Repair estimate',fmt(repair)],['Transport',fmt(transport)],['Total cost',fmt(total)],['Market value',fmt(market)],['Potential margin',fmt(margin)]].map(([k,v])=>`<div class="info-row"><span class="info-key">${k}</span><span class="info-val">${v}</span></div>`).join('');
 
   const risks=[];
   if(tr>=3)risks.push({c:'red',t:`${titleType} title — complicates resale, requires additional processing`});
@@ -793,7 +793,6 @@ async function analyze(){
           model: vData.model,
           damage: damage,
           title_type: titleType,
-          source: source,
           bid: bid,
           repair: repair,
           market: market,
