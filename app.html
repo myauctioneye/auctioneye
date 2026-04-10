@@ -302,21 +302,17 @@ footer{text-align:center;padding:2rem;font-size:12px;color:var(--gray-400);borde
 
   <div class="card hidden" id="bid-card">
     <p class="card-label">Lot details</p>
-    <div class="grid2">
-      <div class="field"><div class="field-label">Auction source</div>
-        <select id="source"><option>Copart</option><option>IAAI</option><option>Local auction</option><option>Manheim</option><option>Other</option></select>
-      </div>
-      <div class="field"><div class="field-label">Title type</div>
-        <select id="title-type"><option>Clean</option><option>Salvage</option><option>Rebuilt</option><option>Parts only</option><option>Certificate of destruction</option></select>
-      </div>
+    <div class="field"><div class="field-label">Title type</div>
+      <select id="title-type"><option>Clean</option><option>Salvage</option><option>Rebuilt</option><option>Parts only</option><option>Certificate of destruction</option></select>
     </div>
     <div class="field"><div class="field-label">Primary damage</div>
       <select id="damage"><option>Front end</option><option>Rear end</option><option>Side</option><option>Rollover</option><option>Flood / water</option><option>Fire</option><option>Hail</option><option>Mechanical</option><option>Minor dents / scratches</option></select>
     </div>
-    <div class="grid3">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div class="field"><div class="field-label">Your bid ($)</div><input type="number" id="bid" value="3000" min="0"/></div>
       <div class="field"><div class="field-label">Repair est. ($)</div><input type="number" id="repair" value="2000" min="0"/></div>
       <div class="field"><div class="field-label">Market value ($)</div><input type="number" id="market" value="8000" min="0"/></div>
+      <div class="field"><div class="field-label">Transport ($) <span style="font-size:11px;color:var(--gray-400);">optional</span></div><input type="number" id="transport" value="0" min="0" placeholder="0"/></div>
     </div>
     <button class="btn-verdict" onclick="analyze()">Get Verdict</button>
   </div>
@@ -711,14 +707,14 @@ const dmgRisk={'Front end':2,'Rear end':1,'Side':2,'Rollover':4,'Flood / water':
 const titleRisk={'Clean':0,'Salvage':3,'Rebuilt':1,'Parts only':5,'Certificate of destruction':5};
 
 async function analyze(){
-  const source=document.getElementById('source').value;
+  const source='Auction';
   const titleType=document.getElementById('title-type').value;
   const damage=document.getElementById('damage').value;
   const bid=parseFloat(document.getElementById('bid').value)||3000;
   const repair=parseFloat(document.getElementById('repair').value)||2000;
   const market=parseFloat(document.getElementById('market').value)||vData.marketEst||8000;
   const fees=Math.round(bid*0.12);
-  const transport=350;
+  const transport=parseFloat(document.getElementById('transport')?.value)||0;
   const total=bid+fees+repair+transport;
   const margin=market-total;
   const roi=(margin/total)*100;
