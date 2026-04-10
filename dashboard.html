@@ -428,14 +428,23 @@ async function loadHistory(){
       return;
     }
 
-    list.innerHTML = data.map(h => {
+    // Deduplicate by VIN - keep most recent
+    const seen = new Set();
+    const unique = data.filter(h => {
+      if(seen.has(h.vin)) return false;
+      seen.add(h.vin);
+      return true;
+    });
+
+    list.innerHTML = unique.map(h => {
       const date = new Date(h.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
       const vClass = h.verdict === 'Deal' ? 'deal' : h.verdict === 'Neutral' ? 'neutral' : 'trap';
       const marginColor = h.margin > 0 ? 'var(--green)' : 'var(--red)';
+      const safeH = encodeURIComponent(JSON.stringify(h));
       return `
-        <div class="history-item" onclick="reopenAnalysis('${h.vin}')" style="cursor:pointer;">
+        <div class="history-item" onclick="openReport(${JSON.stringify(h).replace(/"/g, '&quot;')})" style="cursor:pointer;">
           <div>
-            <div class="history-vehicle">${h.vehicle || h.year+' '+h.make+' '+h.model}</div>
+            <div class="history-vehicle">${h.vehicle || (h.year+' '+h.make+' '+h.model)}</div>
             <div class="history-vin">${h.vin}</div>
             <div style="font-size:11px;color:var(--gray-400);margin-top:2px;">${h.source} · ${h.damage}</div>
           </div>
@@ -507,5 +516,13 @@ if(params.get('success')){
   setTimeout(()=>{ alert('Payment successful! Your plan has been upgraded. Contact myauctioneye@gmail.com if you need help activating it.'); }, 500);
 }
 </script>
+
+<!-- REPORT MODAL -->
+<div id="report-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;">
+  <div style="background:#fff;border-radius:14px;padding:2rem;width:100%;max-width:520px;margin:auto;position:relative;">
+    <button onclick="closeReport()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:#868E96;">×</button>
+    <div id="report-content"></div>
+  </div>
+</div>
 </body>
 </html>

@@ -371,8 +371,9 @@ let currentTab = 'signin';
 // AUTH STATE
 // Init on page load
 window.addEventListener('DOMContentLoaded', async function(){
-  const storedUser = localStorage.getItem('ae_user') || sessionStorage.getItem('ae_user');
-  const storedToken = localStorage.getItem('ae_token') || sessionStorage.getItem('ae_token');
+  const rememberMe = !!localStorage.getItem('ae_token');
+  const storedUser = rememberMe ? localStorage.getItem('ae_user') : sessionStorage.getItem('ae_user');
+  const storedToken = rememberMe ? localStorage.getItem('ae_token') : sessionStorage.getItem('ae_token');
 
   if(storedUser && storedToken){
     try {
@@ -380,20 +381,15 @@ window.addEventListener('DOMContentLoaded', async function(){
       if(parsed && parsed.id && parsed.email){
         currentUser = parsed;
         await loadUserData();
-      } else {
-        throw new Error('Invalid user data');
-      }
-    } catch(e){ 
-      localStorage.removeItem('ae_user'); 
-      localStorage.removeItem('ae_token');
-      sessionStorage.removeItem('ae_user');
-      sessionStorage.removeItem('ae_token');
+      } else { throw new Error('bad'); }
+    } catch(e){
+      localStorage.removeItem('ae_user'); localStorage.removeItem('ae_token');
+      sessionStorage.removeItem('ae_user'); sessionStorage.removeItem('ae_token');
       currentUser = null;
     }
   }
   renderNav();
 
-  // Auto-reopen VIN from dashboard (view report - don't count as new analysis)
   const reopenVin = localStorage.getItem('ae_reopen_vin');
   if(reopenVin){
     localStorage.removeItem('ae_reopen_vin');
@@ -454,7 +450,7 @@ function renderNav(){
     document.getElementById('hero-section').style.paddingTop = '2rem';
   } else {
     nav.innerHTML = `
-      <button class="btn-ghost" onclick="openModal()">Sign in</button>
+      <button class="btn-ghost" onclick="openModal('signin')">Sign in</button>
       <button class="btn-primary-sm" onclick="openModal('signup')">Start free</button>`;
     document.getElementById('usage-wrap').classList.add('hidden');
   }
@@ -475,8 +471,12 @@ function openModal(tab='signin'){
   document.getElementById('auth-modal').classList.add('show');
   document.getElementById('modal-error').style.display='none';
   document.getElementById('modal-success').style.display='none';
-  document.getElementById('auth-email').value='';
+  document.getElementById('auth-login').value='';
   document.getElementById('auth-password').value='';
+  if(document.getElementById('first-name')) document.getElementById('first-name').value='';
+  if(document.getElementById('last-name')) document.getElementById('last-name').value='';
+  if(document.getElementById('username')) document.getElementById('username').value='';
+  if(document.getElementById('gender')) document.getElementById('gender').value='';
 }
 
 function closeModal(){ document.getElementById('auth-modal').classList.remove('show'); }
