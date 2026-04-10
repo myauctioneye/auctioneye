@@ -436,13 +436,15 @@ async function loadHistory(){
       return true;
     });
 
-    list.innerHTML = unique.map(h => {
+    // Store analyses globally for report modal
+    window._analyses = unique;
+    
+    list.innerHTML = unique.map((h, idx) => {
       const date = new Date(h.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
       const vClass = h.verdict === 'Deal' ? 'deal' : h.verdict === 'Neutral' ? 'neutral' : 'trap';
       const marginColor = h.margin > 0 ? 'var(--green)' : 'var(--red)';
-      const safeH = encodeURIComponent(JSON.stringify(h));
       return `
-        <div class="history-item" onclick="openReport(${JSON.stringify(h).replace(/"/g, '&quot;')})" style="cursor:pointer;">
+        <div class="history-item" onclick="openReport(${idx})" style="cursor:pointer;">
           <div>
             <div class="history-vehicle">${h.vehicle || (h.year+' '+h.make+' '+h.model)}</div>
             <div class="history-vin">${h.vin}</div>
