@@ -475,7 +475,7 @@ function toggleFaq(el){
 </script>
 
 <!-- AUTH MODAL -->
-<div class="modal-overlay" id="auth-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;">
+<div id="auth-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;">
   <div style="background:#fff;border-radius:14px;padding:2rem;width:100%;max-width:400px;position:relative;">
     <button onclick="closeModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:#868E96;">×</button>
     <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;" id="modal-title">Welcome to AuctionEye</h2>
@@ -541,7 +541,10 @@ function openModal(tab){
   }
   currentTab = tab || 'signin';
   switchTab(currentTab);
-  document.getElementById('auth-modal').style.display = 'flex';
+  const modal = document.getElementById('auth-modal');
+  modal.style.display = 'flex';
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
   document.getElementById('modal-error').style.display = 'none';
   document.getElementById('modal-success').style.display = 'none';
   document.getElementById('auth-email').value = '';
@@ -551,6 +554,13 @@ function openModal(tab){
 function closeModal(){
   document.getElementById('auth-modal').style.display = 'none';
 }
+
+// Close on overlay click
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('auth-modal').addEventListener('click', function(e){
+    if(e.target === this) closeModal();
+  });
+});
 
 function switchTab(tab){
   currentTab = tab;
