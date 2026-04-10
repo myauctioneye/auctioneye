@@ -554,22 +554,7 @@ function openReport(idx){
       </div>
     </div>
 
-    <div style="background:#F8F9FA;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
-      <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#868E96;margin-bottom:10px;">Vehicle specs</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
-        ${[
-          ['Engine', h.engine],
-          ['Transmission', h.transmission],
-          ['Drive', h.drive],
-          ['Fuel', h.fuel],
-        ].filter(([,v])=>v&&v!=='—').map(([k,v],i,arr)=>`
-          <div style="padding:6px 0;${i%2===0&&i<arr.length-1?'border-bottom:1px solid #E9ECEF;':''}${i%2!==0&&i<arr.length-1?'border-bottom:1px solid #E9ECEF;':''}">
-            <div style="font-size:11px;color:#868E96;">${k}</div>
-            <div style="font-size:13px;font-weight:500;color:#212529;margin-top:2px;">${v}</div>
-          </div>`).join('')}
-        ${!h.engine && !h.transmission ? '<p style="font-size:12px;color:#868E96;">Analyze a new lot to see vehicle specs here.</p>' : ''}
-      </div>
-    </div>
+
 
     <div style="background:${vBg};border-left:4px solid ${vBorder};border-radius:0 10px 10px 0;padding:1rem 1.25rem;margin-bottom:1.25rem;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
