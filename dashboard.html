@@ -124,6 +124,7 @@ nav{background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;height:
 
 .loading{text-align:center;padding:3rem;color:var(--gray-400);}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -652,10 +653,23 @@ async function sendSupport(){
   if(!name || !email || !message){ alert('Please fill in all fields.'); return; }
 
   btn.disabled = true; btn.textContent = 'Sending...';
-  const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\nPlan: ' + userPlan + '\n\n' + message);
-  window.open('mailto:myauctioneye@gmail.com?subject=Support: ' + encodeURIComponent(subject) + '&body=' + body);
-  document.getElementById('support-success').style.display = 'block';
-  document.getElementById('support-message').value = '';
+
+  try {
+    emailjs.init('JKBS9J66f4lsexByR');
+    await emailjs.send('service_xddemts', 'template_ra2b7g9', {
+      name: name,
+      email: email,
+      title: subject,
+      message: message,
+      plan: userPlan || 'free'
+    });
+    document.getElementById('support-success').style.display = 'block';
+    document.getElementById('support-message').value = '';
+  } catch(e){
+    console.error('EmailJS error:', e);
+    alert('Error sending message. Please email us at myauctioneye@gmail.com');
+  }
+
   btn.disabled = false; btn.textContent = 'Send message';
 }
 </script>
