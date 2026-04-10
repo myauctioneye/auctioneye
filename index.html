@@ -535,20 +535,21 @@ window.addEventListener('DOMContentLoaded', function(){
 
 function openModal(tab){
   const storedUser = localStorage.getItem('ae_user') || sessionStorage.getItem('ae_user');
-  if(storedUser){
-    window.location.href = '/dashboard.html';
-    return;
-  }
+  if(storedUser){ window.location.href = '/dashboard.html'; return; }
   currentTab = tab || 'signin';
-  switchTab(currentTab);
   const modal = document.getElementById('auth-modal');
   modal.style.display = 'flex';
   modal.style.alignItems = 'center';
   modal.style.justifyContent = 'center';
   document.getElementById('modal-error').style.display = 'none';
   document.getElementById('modal-success').style.display = 'none';
-  document.getElementById('auth-email').value = '';
-  document.getElementById('auth-password').value = '';
+  const loginEl = document.getElementById('auth-login');
+  if(loginEl) loginEl.value = '';
+  const passEl = document.getElementById('auth-password');
+  if(passEl) passEl.value = '';
+  const sf = document.getElementById('signup-fields');
+  if(sf) sf.style.display = currentTab === 'signup' ? 'block' : 'none';
+  switchTab(currentTab);
 }
 
 function closeModal(){
