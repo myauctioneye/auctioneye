@@ -174,8 +174,8 @@ footer{background:var(--gray-900);color:#fff;padding:3rem 2rem;}
     <a class="nav-link" href="#faq">FAQ</a>
   </div>
   <div class="nav-right">
-    <button class="btn-ghost" onclick="window.location.href='/app.html'" style="cursor:pointer;">Sign in</button>
-    <button class="btn-cta" onclick="window.location.href='/app.html'" style="cursor:pointer;">Start free</button>
+    <button class="btn-ghost" onclick="openModal('signin')" style="cursor:pointer;">Sign in</button>
+    <button class="btn-cta" onclick="openModal('signin')" style="cursor:pointer;">Start free</button>
   </div>
 </nav>
 
@@ -185,7 +185,7 @@ footer{background:var(--gray-900);color:#fff;padding:3rem 2rem;}
   <h1>Know if a lot is a <span class="blue">deal or a trap</span> before you bid</h1>
   <p>Paste any VIN from Copart, IAAI, or a local auction. Get real vehicle data, risk flags, profit margin, and a clear verdict in seconds.</p>
   <div class="hero-btns">
-    <button class="btn-hero btn-hero-primary" onclick="window.location.href='/app.html'" style="cursor:pointer;">Try it free — no card needed</button>
+    <button class="btn-hero btn-hero-primary" onclick="openModal('signin')" style="cursor:pointer;">Try it free — no card needed</button>
     <a class="btn-hero btn-hero-secondary" href="#pricing">See pricing</a>
   </div>
   <p class="hero-note">5 free analyses every month. No credit card required.</p>
@@ -308,7 +308,7 @@ footer{background:var(--gray-900);color:#fff;padding:3rem 2rem;}
       <!-- BASIC -->
       <div class="plan-card">
         <div class="plan-name">Basic</div>
-        <div class="plan-price">$19<span>/mo</span></div>
+        <div class="plan-price">$29<span>/mo</span></div>
         <div class="plan-desc">For buyers who flip a few cars a month and need real market data.</div>
         <hr class="plan-divider"/>
         <ul class="plan-features">
@@ -321,14 +321,14 @@ footer{background:var(--gray-900);color:#fff;padding:3rem 2rem;}
           <li><span class="cross">—</span>Title history (NMVTIS)</li>
           <li><span class="cross">—</span>Lot alerts</li>
         </ul>
-        <button class="plan-btn plan-btn-outline" onclick="window.location='https://buy.stripe.com/test_dRm4gyayd5KSdoc2dIasg00'">Start Basic</button>
+        <button class="plan-btn plan-btn-outline" onclick="window.location='https://buy.stripe.com/test_9B6eVc7m1ddkac005Aasg03'">Start Basic</button>
       </div>
 
       <!-- PRO -->
       <div class="plan-card featured">
         <div class="popular-tag">Most popular</div>
         <div class="plan-name">Pro</div>
-        <div class="plan-price">$39<span>/mo</span></div>
+        <div class="plan-price">$59<span>/mo</span></div>
         <div class="plan-desc">For serious flippers who need the full picture before every bid.</div>
         <hr class="plan-divider"/>
         <ul class="plan-features">
@@ -341,13 +341,13 @@ footer{background:var(--gray-900);color:#fff;padding:3rem 2rem;}
           <li><span class="check">✓</span>Title history (NMVTIS)</li>
           <li><span class="check">✓</span>Lot alerts by email</li>
         </ul>
-        <button class="plan-btn plan-btn-filled" onclick="window.location='https://buy.stripe.com/test_aFa4gy35Lehodoc19Easg01'">Start Pro</button>
+        <button class="plan-btn plan-btn-filled" onclick="window.location='https://buy.stripe.com/test_6oUfZg5dT0qygAo4lQasg04'">Start Pro</button>
       </div>
 
       <!-- DEALER -->
       <div class="plan-card">
         <div class="plan-name">Dealer</div>
-        <div class="plan-price">$99<span>/mo</span></div>
+        <div class="plan-price">$149<span>/mo</span></div>
         <div class="plan-desc">For dealers and wholesalers running high volume across multiple auctions.</div>
         <hr class="plan-divider"/>
         <ul class="plan-features">
@@ -362,7 +362,7 @@ footer{background:var(--gray-900);color:#fff;padding:3rem 2rem;}
           <li><span class="check">✓</span>5 team seats</li>
           <li><span class="check">✓</span>API access</li>
         </ul>
-        <button class="plan-btn plan-btn-outline" onclick="window.location='https://buy.stripe.com/test_6oU7sK49P0qy3NC5pUasg02'">Start Dealer</button>
+        <button class="plan-btn plan-btn-outline" onclick="window.location='https://buy.stripe.com/test_8x2bJ05dT1uCesg9Gaasg05'">Start Dealer</button>
       </div>
 
     </div>
@@ -625,7 +625,7 @@ async function handleAuth(){
         localStorage.removeItem('ae_token');
         localStorage.removeItem('ae_user');
       }
-      window.location.href = '/app.html';
+      window.location.href = '/dashboard.html';
     }
   } catch(e){
     errEl.textContent = e.message || 'Something went wrong. Try again.';
