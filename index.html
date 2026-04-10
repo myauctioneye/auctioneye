@@ -584,6 +584,10 @@ function switchTab(tab){
   }
   document.getElementById('modal-error').style.display = 'none';
   document.getElementById('modal-success').style.display = 'none';
+  const sf = document.getElementById('signup-fields');
+  if(sf) sf.style.display = tab === 'signup' ? 'block' : 'none';
+  const loginEl = document.getElementById('auth-login');
+  if(loginEl) loginEl.placeholder = tab === 'signin' ? 'Email or username' : 'Email address';
 }
 
 async function handleAuth(){
