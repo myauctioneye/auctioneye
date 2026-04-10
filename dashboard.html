@@ -496,7 +496,7 @@ function selectPlan(plan){
 async function signOut(){
   localStorage.removeItem('ae_user'); localStorage.removeItem('ae_token');
   sessionStorage.removeItem('ae_user'); sessionStorage.removeItem('ae_token');
-  window.location.href = '/';
+  window.location.href = '/index.html';
 }
 
 const params = new URLSearchParams(window.location.search);
