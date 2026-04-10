@@ -174,8 +174,8 @@ footer{background:var(--gray-900);color:#fff;padding:3rem 2rem;}
     <a class="nav-link" href="#faq">FAQ</a>
   </div>
   <div class="nav-right">
-    <button class="btn-ghost" onclick="openModal('signin')" style="cursor:pointer;">Sign in</button>
-    <button class="btn-cta" onclick="openModal('signup')" style="cursor:pointer;">Start free</button>
+    <button class="btn-ghost" onclick="window.location.href='/app.html'" style="cursor:pointer;">Sign in</button>
+    <button class="btn-cta" onclick="window.location.href='/app.html'" style="cursor:pointer;">Start free</button>
   </div>
 </nav>
 
@@ -185,7 +185,7 @@ footer{background:var(--gray-900);color:#fff;padding:3rem 2rem;}
   <h1>Know if a lot is a <span class="blue">deal or a trap</span> before you bid</h1>
   <p>Paste any VIN from Copart, IAAI, or a local auction. Get real vehicle data, risk flags, profit margin, and a clear verdict in seconds.</p>
   <div class="hero-btns">
-    <button class="btn-hero btn-hero-primary" onclick="openModal('signup')" style="cursor:pointer;">Try it free — no card needed</button>
+    <button class="btn-hero btn-hero-primary" onclick="window.location.href='/app.html'" style="cursor:pointer;">Try it free — no card needed</button>
     <a class="btn-hero btn-hero-secondary" href="#pricing">See pricing</a>
   </div>
   <p class="hero-note">5 free analyses every month. No credit card required.</p>
@@ -486,7 +486,23 @@ function toggleFaq(el){
     </div>
     <div id="modal-error" style="background:#FCEBEB;color:#A32D2D;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
     <div id="modal-success" style="background:#E1F5EE;color:#0F6E56;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
-    <input id="auth-email" type="email" placeholder="your@email.com" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:10px;box-sizing:border-box;" />
+    <!-- Signup fields -->
+    <div id="signup-fields" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <input id="first-name" type="text" placeholder="First name" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;box-sizing:border-box;" />
+        <input id="last-name" type="text" placeholder="Last name" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;box-sizing:border-box;" />
+      </div>
+      <input id="username" type="text" placeholder="Username (e.g. carflip99)" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:8px;box-sizing:border-box;" />
+      <select id="gender" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:8px;box-sizing:border-box;appearance:none;">
+        <option value="">Select gender</option>
+        <option value="male">Male (Mr.)</option>
+        <option value="female">Female (Ms.)</option>
+        <option value="nonbinary">Non-binary (Mx.)</option>
+        <option value="trans">Transgender (Mx.)</option>
+        <option value="other">Prefer not to say</option>
+      </select>
+    </div>
+    <input id="auth-login" type="text" placeholder="Email or username" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:10px;box-sizing:border-box;" />
     <input id="auth-password" type="password" placeholder="Password (min 6 characters)" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:10px;box-sizing:border-box;" />
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><input type="checkbox" id="remember-me" checked style="width:16px;height:16px;cursor:pointer;accent-color:#185FA5;" /><label for="remember-me" style="font-size:13px;color:#495057;cursor:pointer;">Remember me</label></div>
     <button id="auth-btn" onclick="handleAuth()" style="width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;">Sign in</button>

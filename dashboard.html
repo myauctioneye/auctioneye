@@ -357,9 +357,12 @@ window.addEventListener('DOMContentLoaded', async function(){
 
 async function loadDashboard(){
   const email = currentUser.email;
-  const name = email.split('@')[0];
-  document.getElementById('nav-email').textContent = email;
-  document.getElementById('greeting').textContent = 'Welcome back, ' + name;
+  const title = currentUser.gender === 'male' ? 'Mr.' : currentUser.gender === 'female' ? 'Ms.' : (currentUser.gender === 'nonbinary' || currentUser.gender === 'trans') ? 'Mx.' : '';
+  const fullName = (currentUser.first_name && currentUser.last_name)
+    ? (title ? title + ' ' : '') + currentUser.first_name + ' ' + currentUser.last_name
+    : email.split('@')[0];
+  document.getElementById('nav-email').textContent = currentUser.username ? '@'+currentUser.username : email;
+  document.getElementById('greeting').textContent = 'Welcome back, ' + fullName;
 
   const month = new Date().toISOString().slice(0,7);
   const monthName = new Date().toLocaleString('en-US', {month:'long', year:'numeric'});
