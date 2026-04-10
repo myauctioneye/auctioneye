@@ -299,7 +299,7 @@ nav{background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;height:
         <div class="action-sub">Get more analyses & features</div>
       </div>
     </div>
-    <a class="action-card" href="#" onclick="openSupport(); return false;">
+    <div class="action-card" onclick="openSupport()" style="cursor:pointer;">
       <div class="action-icon ai-amber">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="10" rx="2" stroke="#BA7517" stroke-width="1.5"/><path d="M3 7 L10 12 L17 7" stroke="#BA7517" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
@@ -307,7 +307,7 @@ nav{background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;height:
         <div class="action-title">Contact support</div>
         <div class="action-sub">Get help from our team</div>
       </div>
-    </a>
+    </div>
   </div>
 
   <div class="section-title">Recent analyses</div>
@@ -339,6 +339,7 @@ let userPlan = 'free';
 let analysesUsed = 0;
 
 window.addEventListener('DOMContentLoaded', async function(){
+  document.getElementById('support-modal').addEventListener('click', function(e){ if(e.target===this) closeSupport(); });
   const storedUser = localStorage.getItem('ae_user') || sessionStorage.getItem('ae_user');
   const storedToken = localStorage.getItem('ae_token') || sessionStorage.getItem('ae_token');
   if(storedUser && storedToken){
