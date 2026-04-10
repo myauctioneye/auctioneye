@@ -587,8 +587,10 @@ function switchTab(tab){
 }
 
 async function handleAuth(){
-  const loginInput = document.getElementById('auth-login') ? document.getElementById('auth-login').value.trim() : document.getElementById('auth-email')?.value.trim();
-  const password = document.getElementById('auth-password').value;
+  const loginEl = document.getElementById('auth-login') || document.getElementById('auth-email');
+  const loginInput = loginEl ? loginEl.value.trim() : '';
+  const passEl = document.getElementById('auth-password');
+  const password = passEl ? passEl.value : '';
   const btn = document.getElementById('auth-btn');
   const errEl = document.getElementById('modal-error');
   const sucEl = document.getElementById('modal-success');
