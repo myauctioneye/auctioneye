@@ -615,7 +615,13 @@ async function lookupVIN(){
     setStep(2,'done','Market value estimated');
     setStep(3,'done','Ready — enter lot details below');
 
-    if(currentUser && !viewingReport) await incrementUsage();
+    if(currentUser && !viewingReport){
+    const lastVin = sessionStorage.getItem('ae_last_vin');
+    if(lastVin !== vData.vin){
+      await incrementUsage();
+      sessionStorage.setItem('ae_last_vin', vData.vin);
+    }
+  }
   viewingReport = false;
 
     renderVehicle();
