@@ -627,6 +627,37 @@ function reanalyze(vin){
   localStorage.setItem('ae_reopen_vin', vin);
   window.location.href = '/app.html';
 }
+
+function openSupport(){
+  document.getElementById('support-modal').style.display = 'flex';
+  document.getElementById('support-success').style.display = 'none';
+  if(currentUser){
+    const name = (currentUser.first_name && currentUser.last_name) ? currentUser.first_name + ' ' + currentUser.last_name : '';
+    document.getElementById('support-name').value = name;
+    document.getElementById('support-email').value = currentUser.email || '';
+  }
+}
+
+function closeSupport(){
+  document.getElementById('support-modal').style.display = 'none';
+}
+
+async function sendSupport(){
+  const name = document.getElementById('support-name').value.trim();
+  const email = document.getElementById('support-email').value.trim();
+  const subject = document.getElementById('support-subject').value;
+  const message = document.getElementById('support-message').value.trim();
+  const btn = document.getElementById('support-btn');
+
+  if(!name || !email || !message){ alert('Please fill in all fields.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Sending...';
+  const body = encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\nPlan: ' + userPlan + '\n\n' + message);
+  window.open('mailto:myauctioneye@gmail.com?subject=Support: ' + encodeURIComponent(subject) + '&body=' + body);
+  document.getElementById('support-success').style.display = 'block';
+  document.getElementById('support-message').value = '';
+  btn.disabled = false; btn.textContent = 'Send message';
+}
 </script>
 
 <!-- REPORT MODAL -->
