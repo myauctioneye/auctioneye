@@ -174,8 +174,8 @@ footer{background:var(--gray-900);color:#fff;padding:3rem 2rem;}
     <a class="nav-link" href="#faq">FAQ</a>
   </div>
   <div class="nav-right">
-    <button class="btn-ghost" onclick="openModal('signin')" style="cursor:pointer;">Sign in</button>
-    <button class="btn-cta" onclick="openModal('signup')" style="cursor:pointer;">Start free</button>
+    <button class="btn-ghost" onclick="openSignIn()" style="cursor:pointer;">Sign in</button>
+    <button class="btn-cta" onclick="openSignup()" style="cursor:pointer;">Start free</button>
   </div>
 </nav>
 
@@ -185,7 +185,7 @@ footer{background:var(--gray-900);color:#fff;padding:3rem 2rem;}
   <h1>Know if a lot is a <span class="blue">deal or a trap</span> before you bid</h1>
   <p>Paste any VIN from Copart, IAAI, or a local auction. Get real vehicle data, risk flags, profit margin, and a clear verdict in seconds.</p>
   <div class="hero-btns">
-    <button class="btn-hero btn-hero-primary" onclick="openModal('signup')" style="cursor:pointer;">Try it free — no card needed</button>
+    <button class="btn-hero btn-hero-primary" onclick="openSignup()" style="cursor:pointer;">Try it free — no card needed</button>
     <a class="btn-hero btn-hero-secondary" href="#pricing">See pricing</a>
   </div>
   <p class="hero-note">5 free analyses every month. No credit card required.</p>
@@ -474,218 +474,185 @@ function toggleFaq(el){
 }
 </script>
 
-<!-- AUTH MODAL -->
-<div id="auth-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;">
+<!-- SIGNIN MODAL -->
+<div id="signin-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;">
   <div style="background:#fff;border-radius:14px;padding:2rem;width:100%;max-width:400px;position:relative;">
-    <button onclick="closeModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:#868E96;">×</button>
-    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;" id="modal-title">Welcome to AuctionEye</h2>
-    <p style="font-size:14px;color:#868E96;margin-bottom:1.25rem;" id="modal-sub">Sign in to your account</p>
-    <div style="display:flex;border:1px solid #E9ECEF;border-radius:8px;overflow:hidden;margin-bottom:1.25rem;">
-      <button id="tab-signin" onclick="switchTab('signin')" style="flex:1;padding:8px;font-size:14px;font-weight:500;border:none;background:#185FA5;color:#fff;cursor:pointer;font-family:'Inter',sans-serif;">Sign in</button>
-      <button id="tab-signup" onclick="switchTab('signup')" style="flex:1;padding:8px;font-size:14px;font-weight:500;border:none;background:transparent;color:#868E96;cursor:pointer;font-family:'Inter',sans-serif;">Sign up</button>
+    <button onclick="document.getElementById('signin-modal').style.display='none'" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:#868E96;">×</button>
+    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;">Welcome back</h2>
+    <p style="font-size:14px;color:#868E96;margin-bottom:1.25rem;">Sign in to your AuctionEye account</p>
+    <div id="si-error" style="background:#FCEBEB;color:#A32D2D;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
+    <input id="si-login" type="text" placeholder="Email or username" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:10px;box-sizing:border-box;" />
+    <input id="si-password" type="password" placeholder="Password" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:10px;box-sizing:border-box;" />
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <input type="checkbox" id="si-remember" checked style="width:16px;height:16px;cursor:pointer;accent-color:#185FA5;" />
+      <label for="si-remember" style="font-size:13px;color:#495057;cursor:pointer;">Remember me</label>
     </div>
-    <div id="modal-error" style="background:#FCEBEB;color:#A32D2D;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
-    <div id="modal-success" style="background:#E1F5EE;color:#0F6E56;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
-    <!-- Signup fields -->
-    <div id="signup-fields" style="display:none;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-        <input id="first-name" type="text" placeholder="First name" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;box-sizing:border-box;" />
-        <input id="last-name" type="text" placeholder="Last name" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;box-sizing:border-box;" />
-      </div>
-      <input id="username" type="text" placeholder="Username (e.g. carflip99)" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:8px;box-sizing:border-box;" />
-      <select id="gender" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:8px;box-sizing:border-box;appearance:none;">
-        <option value="">Select gender</option>
-        <option value="male">Male (Mr.)</option>
-        <option value="female">Female (Ms.)</option>
-        <option value="nonbinary">Non-binary (Mx.)</option>
-        <option value="trans">Transgender (Mx.)</option>
-        <option value="other">Prefer not to say</option>
-      </select>
+    <button onclick="handleSignIn()" style="width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;" id="si-btn">Sign in</button>
+    <p style="font-size:12px;color:#868E96;text-align:center;margin-top:12px;">Don't have an account? <span onclick="openSignup()" style="color:#185FA5;cursor:pointer;font-weight:500;">Sign up free</span></p>
+  </div>
+</div>
+
+<!-- SIGNUP MODAL -->
+<div id="signup-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;">
+  <div style="background:#fff;border-radius:14px;padding:2rem;width:100%;max-width:400px;position:relative;margin:auto;">
+    <button onclick="document.getElementById('signup-modal').style.display='none'" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:#868E96;">×</button>
+    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;">Create your account</h2>
+    <p style="font-size:14px;color:#868E96;margin-bottom:1.25rem;">Start with 5 free analyses per month</p>
+    <div id="su-error" style="background:#FCEBEB;color:#A32D2D;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
+    <div id="su-success" style="background:#E1F5EE;color:#0F6E56;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <input id="su-firstname" type="text" placeholder="First name" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;box-sizing:border-box;" />
+      <input id="su-lastname" type="text" placeholder="Last name" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;box-sizing:border-box;" />
     </div>
-    <input id="auth-login" type="text" placeholder="Email or username" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:10px;box-sizing:border-box;" />
-    <input id="auth-password" type="password" placeholder="Password (min 6 characters)" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:10px;box-sizing:border-box;" />
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><input type="checkbox" id="remember-me" checked style="width:16px;height:16px;cursor:pointer;accent-color:#185FA5;" /><label for="remember-me" style="font-size:13px;color:#495057;cursor:pointer;">Remember me</label></div>
-    <button id="auth-btn" onclick="handleAuth()" style="width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;">Sign in</button>
-    <p style="font-size:12px;color:#868E96;text-align:center;margin-top:12px;">Free plan — 5 analyses per month</p>
+    <input id="su-username" type="text" placeholder="Username (e.g. carflip99)" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:10px;box-sizing:border-box;" />
+    <select id="su-gender" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:10px;box-sizing:border-box;appearance:none;">
+      <option value="">Select gender</option>
+      <option value="male">Male (Mr.)</option>
+      <option value="female">Female (Ms.)</option>
+      <option value="nonbinary">Non-binary (Mx.)</option>
+      <option value="trans">Transgender (Mx.)</option>
+      <option value="other">Prefer not to say</option>
+    </select>
+    <input id="su-email" type="email" placeholder="Email address" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:10px;box-sizing:border-box;" />
+    <input id="su-password" type="password" placeholder="Password (min 6 characters)" style="width:100%;padding:11px 14px;border:1.5px solid #E9ECEF;border-radius:8px;font-size:14px;font-family:'Inter',sans-serif;color:#212529;margin-bottom:12px;box-sizing:border-box;" />
+    <button onclick="handleSignUp()" style="width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;" id="su-btn">Create account</button>
+    <p style="font-size:12px;color:#868E96;text-align:center;margin-top:12px;">Already have an account? <span onclick="openSignIn()" style="color:#185FA5;cursor:pointer;font-weight:500;">Sign in</span></p>
   </div>
 </div>
 
 <script>
 const SUPABASE_URL = 'https://gwwiuosdyrngtpbxuknq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3d2l1b3NkeXJuZ3RwYnh1a25xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3ODAyODEsImV4cCI6MjA5MTM1NjI4MX0.1C9P21lICqB4_SzCM82YkyalvPF-FaO7t6LhYg1goFM';
-let currentTab = 'signin';
 
-// Check if already logged in
 window.addEventListener('DOMContentLoaded', function(){
   const storedUser = localStorage.getItem('ae_user') || sessionStorage.getItem('ae_user');
-  const storedToken = localStorage.getItem('ae_token') || sessionStorage.getItem('ae_token');
-  if(storedUser && storedToken){
-    // Already logged in - update nav
+  if(storedUser){
     try {
       const user = JSON.parse(storedUser);
       const nav = document.getElementById('nav-right');
-      if(nav){
-        nav.innerHTML = `
-          <a class="btn-ghost" href="/dashboard.html">Dashboard</a>
-          <a class="btn-cta" href="/app.html">Analyze a lot</a>`;
-      }
+      if(nav) nav.innerHTML = `<a class="btn-ghost" href="/dashboard.html">Dashboard</a><a class="btn-cta" href="/app.html">Analyze a lot</a>`;
     } catch(e){}
   }
+  document.getElementById('signin-modal').addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
+  document.getElementById('signup-modal').addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
 });
 
-function openModal(tab){
-  const storedUser = localStorage.getItem('ae_user') || sessionStorage.getItem('ae_user');
-  if(storedUser){ window.location.href = '/dashboard.html'; return; }
-  currentTab = tab || 'signin';
-  const modal = document.getElementById('auth-modal');
-  modal.style.display = 'flex';
-  modal.style.alignItems = 'center';
-  modal.style.justifyContent = 'center';
-  document.getElementById('modal-error').style.display = 'none';
-  document.getElementById('modal-success').style.display = 'none';
-  const loginEl = document.getElementById('auth-login');
-  if(loginEl) loginEl.value = '';
-  const passEl = document.getElementById('auth-password');
-  if(passEl) passEl.value = '';
-  const sf = document.getElementById('signup-fields');
-  if(sf) sf.style.display = currentTab === 'signup' ? 'block' : 'none';
-  switchTab(currentTab);
+function openSignIn(){
+  const stored = localStorage.getItem('ae_user') || sessionStorage.getItem('ae_user');
+  if(stored){ window.location.href='/dashboard.html'; return; }
+  document.getElementById('signin-modal').style.display='flex';
+  document.getElementById('si-error').style.display='none';
+  document.getElementById('si-login').value='';
+  document.getElementById('si-password').value='';
 }
 
-function closeModal(){
-  document.getElementById('auth-modal').style.display = 'none';
+function openSignup(){
+  const stored = localStorage.getItem('ae_user') || sessionStorage.getItem('ae_user');
+  if(stored){ window.location.href='/dashboard.html'; return; }
+  document.getElementById('signup-modal').style.display='flex';
+  document.getElementById('su-error').style.display='none';
+  document.getElementById('su-success').style.display='none';
 }
 
-// Close on overlay click
-document.addEventListener('DOMContentLoaded', function(){
-  document.getElementById('auth-modal').addEventListener('click', function(e){
-    if(e.target === this) closeModal();
-  });
-});
+async function handleSignIn(){
+  const login = document.getElementById('si-login').value.trim();
+  const password = document.getElementById('si-password').value;
+  const remember = document.getElementById('si-remember').checked;
+  const btn = document.getElementById('si-btn');
+  const err = document.getElementById('si-error');
 
-function switchTab(tab){
-  currentTab = tab;
-  const si = document.getElementById('tab-signin');
-  const su = document.getElementById('tab-signup');
-  const btn = document.getElementById('auth-btn');
-  const title = document.getElementById('modal-title');
-  const sub = document.getElementById('modal-sub');
-  if(tab === 'signin'){
-    si.style.background = '#185FA5'; si.style.color = '#fff';
-    su.style.background = 'transparent'; su.style.color = '#868E96';
-    btn.textContent = 'Sign in';
-    title.textContent = 'Welcome back';
-    sub.textContent = 'Sign in to your AuctionEye account';
-  } else {
-    su.style.background = '#185FA5'; su.style.color = '#fff';
-    si.style.background = 'transparent'; si.style.color = '#868E96';
-    btn.textContent = 'Create account';
-    title.textContent = 'Create your account';
-    sub.textContent = 'Start with 5 free analyses per month';
-  }
-  document.getElementById('modal-error').style.display = 'none';
-  document.getElementById('modal-success').style.display = 'none';
-  const sf = document.getElementById('signup-fields');
-  if(sf) sf.style.display = tab === 'signup' ? 'block' : 'none';
-  const loginEl = document.getElementById('auth-login');
-  if(loginEl) loginEl.placeholder = tab === 'signin' ? 'Email or username' : 'Email address';
-}
+  if(!login){ err.textContent='Enter your email or username.'; err.style.display='block'; return; }
+  if(!password||password.length<6){ err.textContent='Password must be at least 6 characters.'; err.style.display='block'; return; }
 
-async function handleAuth(){
-  const loginEl = document.getElementById('auth-login') || document.getElementById('auth-email');
-  const loginInput = loginEl ? loginEl.value.trim() : '';
-  const passEl = document.getElementById('auth-password');
-  const password = passEl ? passEl.value : '';
-  const btn = document.getElementById('auth-btn');
-  const errEl = document.getElementById('modal-error');
-  const sucEl = document.getElementById('modal-success');
-  const rememberMe = document.getElementById('remember-me')?.checked !== false;
-
-  if(!loginInput){ errEl.textContent='Enter your email or username.'; errEl.style.display='block'; return; }
-  if(!password || password.length < 6){ errEl.textContent='Password must be at least 6 characters.'; errEl.style.display='block'; return; }
-
-  btn.disabled = true; btn.textContent = 'Please wait...';
-  errEl.style.display = 'none'; sucEl.style.display = 'none';
+  btn.disabled=true; btn.textContent='Please wait...'; err.style.display='none';
 
   try {
-    if(currentTab === 'signup'){
-      const firstName = document.getElementById('first-name')?.value.trim();
-      const lastName = document.getElementById('last-name')?.value.trim();
-      const username = document.getElementById('username')?.value.trim().toLowerCase();
-      const gender = document.getElementById('gender')?.value;
-
-      if(!firstName){ errEl.textContent='Enter your first name.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
-      if(!lastName){ errEl.textContent='Enter your last name.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
-      if(!username||username.length<3){ errEl.textContent='Username must be at least 3 characters.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
-      if(!gender){ errEl.textContent='Please select your gender.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
-      if(!loginInput.includes('@')){ errEl.textContent='Enter a valid email address.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
-
-      const checkRes = await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+username+'&select=id', { headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY} });
-      const checkData = await checkRes.json();
-      if(checkData&&checkData.length>0){ errEl.textContent='Username taken.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
-
-      const signupRes = await fetch(SUPABASE_URL+'/auth/v1/signup', {
-        method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
-        body: JSON.stringify({email:loginInput, password})
-      });
-      const signupData = await signupRes.json();
-      if(!signupRes.ok) throw new Error(signupData.error_description||signupData.msg||'Signup failed');
-
-      const signinRes = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password', {
-        method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
-        body: JSON.stringify({email:loginInput, password})
-      });
-      const signinData = await signinRes.json();
-
-      if(signinRes.ok&&signinData.access_token){
-        await fetch(SUPABASE_URL+'/rest/v1/profiles', {
-          method:'POST',
-          headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+signinData.access_token,'Prefer':'return=minimal'},
-          body: JSON.stringify({id:signinData.user.id, first_name:firstName, last_name:lastName, username, gender, email:loginInput})
-        });
-        const userWithProfile = {...signinData.user, first_name:firstName, last_name:lastName, username, gender};
-        if(rememberMe){ localStorage.setItem('ae_token',signinData.access_token); localStorage.setItem('ae_user',JSON.stringify(userWithProfile)); }
-        else { sessionStorage.setItem('ae_token',signinData.access_token); sessionStorage.setItem('ae_user',JSON.stringify(userWithProfile)); }
-        window.location.href = '/dashboard.html';
-      } else {
-        sucEl.textContent='Account created! You can now sign in.'; sucEl.style.display='block';
-        switchTab('signin');
-      }
-    } else {
-      let email = loginInput;
-      if(!loginInput.includes('@')){
-        const lookupRes = await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+loginInput.toLowerCase()+'&select=email', { headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY} });
-        const lookupData = await lookupRes.json();
-        if(!lookupData||!lookupData.length){ errEl.textContent='Username not found.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Sign in'; return; }
-        email = lookupData[0].email;
-      }
-      const res = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password', {
-        method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
-        body: JSON.stringify({email, password})
-      });
-      const data = await res.json();
-      if(!res.ok) throw new Error(data.error_description||data.msg||'Wrong email or password');
-
-      const profileRes = await fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+data.user.id+'&select=*', { headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.access_token} });
-      const profileData = await profileRes.json();
-      const profile = profileData&&profileData.length ? profileData[0] : {};
-      const userWithProfile = {...data.user, ...profile};
-
-      if(rememberMe){ localStorage.setItem('ae_token',data.access_token); localStorage.setItem('ae_user',JSON.stringify(userWithProfile)); }
-      else { sessionStorage.setItem('ae_token',data.access_token); sessionStorage.setItem('ae_user',JSON.stringify(userWithProfile)); }
-      window.location.href = '/dashboard.html';
+    let email = login;
+    if(!login.includes('@')){
+      const r = await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+login.toLowerCase()+'&select=email', {headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+      const d = await r.json();
+      if(!d||!d.length){ err.textContent='Username not found.'; err.style.display='block'; btn.disabled=false; btn.textContent='Sign in'; return; }
+      email = d[0].email;
     }
+    const res = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password', {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+      body: JSON.stringify({email, password})
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error_description||data.msg||'Wrong email or password');
+
+    const pRes = await fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+data.user.id+'&select=*', {headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.access_token}});
+    const pData = await pRes.json();
+    const profile = pData&&pData.length ? pData[0] : {};
+    const user = {...data.user, ...profile};
+
+    if(remember){ localStorage.setItem('ae_token',data.access_token); localStorage.setItem('ae_user',JSON.stringify(user)); }
+    else { sessionStorage.setItem('ae_token',data.access_token); sessionStorage.setItem('ae_user',JSON.stringify(user)); }
+    window.location.href='/dashboard.html';
   } catch(e){
-    errEl.textContent = e.message||'Something went wrong. Try again.';
-    errEl.style.display = 'block';
+    err.textContent=e.message||'Something went wrong.'; err.style.display='block';
+    btn.disabled=false; btn.textContent='Sign in';
   }
-  btn.disabled=false; btn.textContent=currentTab==='signin'?'Sign in':'Create account';
 }
 
-// Close modal on overlay click
-document.getElementById('auth-modal').addEventListener('click', function(e){
-  if(e.target === this) closeModal();
-});
+async function handleSignUp(){
+  const firstName = document.getElementById('su-firstname').value.trim();
+  const lastName = document.getElementById('su-lastname').value.trim();
+  const username = document.getElementById('su-username').value.trim().toLowerCase();
+  const gender = document.getElementById('su-gender').value;
+  const email = document.getElementById('su-email').value.trim();
+  const password = document.getElementById('su-password').value;
+  const btn = document.getElementById('su-btn');
+  const err = document.getElementById('su-error');
+  const suc = document.getElementById('su-success');
+
+  if(!firstName){ err.textContent='Enter your first name.'; err.style.display='block'; return; }
+  if(!lastName){ err.textContent='Enter your last name.'; err.style.display='block'; return; }
+  if(!username||username.length<3){ err.textContent='Username must be at least 3 characters.'; err.style.display='block'; return; }
+  if(!/^[a-z0-9_]+$/.test(username)){ err.textContent='Username: letters, numbers and underscores only.'; err.style.display='block'; return; }
+  if(!gender){ err.textContent='Please select your gender.'; err.style.display='block'; return; }
+  if(!email||!email.includes('@')){ err.textContent='Enter a valid email.'; err.style.display='block'; return; }
+  if(!password||password.length<6){ err.textContent='Password must be at least 6 characters.'; err.style.display='block'; return; }
+
+  btn.disabled=true; btn.textContent='Please wait...'; err.style.display='none'; suc.style.display='none';
+
+  try {
+    const chk = await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+username+'&select=id', {headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const chkD = await chk.json();
+    if(chkD&&chkD.length>0){ err.textContent='Username already taken.'; err.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
+
+    const signupRes = await fetch(SUPABASE_URL+'/auth/v1/signup', {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+      body: JSON.stringify({email, password})
+    });
+    const signupData = await signupRes.json();
+    if(!signupRes.ok) throw new Error(signupData.error_description||signupData.msg||'Signup failed');
+
+    const siRes = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password', {
+      method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+      body: JSON.stringify({email, password})
+    });
+    const siData = await siRes.json();
+
+    if(siRes.ok&&siData.access_token){
+      await fetch(SUPABASE_URL+'/rest/v1/profiles', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+siData.access_token,'Prefer':'return=minimal'},
+        body: JSON.stringify({id:siData.user.id, first_name:firstName, last_name:lastName, username, gender, email})
+      });
+      const user = {...siData.user, first_name:firstName, last_name:lastName, username, gender};
+      localStorage.setItem('ae_token',siData.access_token);
+      localStorage.setItem('ae_user',JSON.stringify(user));
+      window.location.href='/dashboard.html';
+    } else {
+      suc.textContent='Account created! You can now sign in.'; suc.style.display='block';
+      btn.disabled=false; btn.textContent='Create account';
+    }
+  } catch(e){
+    err.textContent=e.message||'Something went wrong.'; err.style.display='block';
+    btn.disabled=false; btn.textContent='Create account';
+  }
+}
 </script>
 </body>
 </html>
