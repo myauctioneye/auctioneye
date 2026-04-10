@@ -270,11 +270,13 @@ footer{text-align:center;padding:2rem;font-size:12px;color:var(--gray-400);borde
 
 <div class="usage-bar-wrap hidden" id="usage-wrap">
   <div class="usage-bar-card">
-    <span id="usage-text" style="white-space:nowrap;"></span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="plan-badge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:#E8F0FB;color:#185FA5;letter-spacing:0.04em;text-transform:uppercase;"></span>
+      <span id="usage-text" style="white-space:nowrap;font-size:13px;color:var(--gray-400);"></span>
+    </div>
     <div class="usage-bar-track">
       <div class="usage-bar-fill" id="usage-fill"></div>
     </div>
-    <span class="upgrade-link" onclick="document.getElementById('upgrade-modal').classList.add('show')">Upgrade</span>
   </div>
 </div>
 
@@ -462,13 +464,30 @@ function renderUsageBar(){
   const fill = document.getElementById('usage-fill');
   fill.style.width = pct+'%';
   fill.className = 'usage-bar-fill' + (pct>=100?' full':pct>=80?' warning':'');
+  
   const planLabel = {'free':'Free','basic':'Basic','pro':'Pro','dealer':'Dealer'}[userPlan] || 'Free';
+  const badgeColors = {
+    free: 'background:#F1F3F5;color:#868E96;',
+    basic: 'background:#E8F0FB;color:#185FA5;',
+    pro: 'background:#E1F5EE;color:#1D9E75;',
+    dealer: 'background:#FFF3E0;color:#E65100;'
+  };
+  
+  const badge = document.getElementById('plan-badge');
+  if(badge){
+    badge.textContent = planLabel;
+    badge.style.cssText = 'font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;letter-spacing:0.04em;text-transform:uppercase;' + (badgeColors[userPlan] || badgeColors.free);
+  }
+
+  const usageText = document.getElementById('usage-text');
   if(pct >= 100){
-    document.getElementById('usage-text').textContent = 'Limit reached — upgrade to continue';
+    usageText.textContent = 'Monthly limit reached';
+    usageText.style.color = 'var(--red)';
   } else if(pct >= 80){
-    document.getElementById('usage-text').textContent = planLabel + ' plan — almost at limit';
+    usageText.textContent = 'Almost at limit';
+    usageText.style.color = 'var(--amber)';
   } else {
-    document.getElementById('usage-text').textContent = planLabel + ' plan';
+    usageText.textContent = '';
   }
 }
 
