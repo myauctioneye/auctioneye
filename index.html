@@ -587,62 +587,92 @@ function switchTab(tab){
 }
 
 async function handleAuth(){
-  const email = document.getElementById('auth-email').value.trim();
+  const loginInput = document.getElementById('auth-login') ? document.getElementById('auth-login').value.trim() : document.getElementById('auth-email')?.value.trim();
   const password = document.getElementById('auth-password').value;
   const btn = document.getElementById('auth-btn');
   const errEl = document.getElementById('modal-error');
   const sucEl = document.getElementById('modal-success');
+  const rememberMe = document.getElementById('remember-me')?.checked !== false;
 
-  if(!email || !email.includes('@')){ errEl.textContent='Enter a valid email.'; errEl.style.display='block'; return; }
+  if(!loginInput){ errEl.textContent='Enter your email or username.'; errEl.style.display='block'; return; }
   if(!password || password.length < 6){ errEl.textContent='Password must be at least 6 characters.'; errEl.style.display='block'; return; }
 
-  btn.disabled = true;
-  btn.textContent = 'Please wait...';
-  errEl.style.display = 'none';
-  sucEl.style.display = 'none';
-
-  const endpoint = currentTab === 'signup' ? 'signup' : 'token?grant_type=password';
-  const url = SUPABASE_URL + '/auth/v1/' + endpoint;
+  btn.disabled = true; btn.textContent = 'Please wait...';
+  errEl.style.display = 'none'; sucEl.style.display = 'none';
 
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY
-      },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-    if(!res.ok) throw new Error(data.error_description || data.msg || data.message || 'Authentication failed');
-
     if(currentTab === 'signup'){
-      sucEl.textContent = 'Account created! You can now sign in.';
-      sucEl.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = 'Create account';
-      switchTab('signin');
-    } else {
-      const rememberMe = document.getElementById('remember-me')?.checked !== false;
-      if(rememberMe){
-        localStorage.setItem('ae_token', data.access_token);
-        localStorage.setItem('ae_user', JSON.stringify(data.user));
+      const firstName = document.getElementById('first-name')?.value.trim();
+      const lastName = document.getElementById('last-name')?.value.trim();
+      const username = document.getElementById('username')?.value.trim().toLowerCase();
+      const gender = document.getElementById('gender')?.value;
+
+      if(!firstName){ errEl.textContent='Enter your first name.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
+      if(!lastName){ errEl.textContent='Enter your last name.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
+      if(!username||username.length<3){ errEl.textContent='Username must be at least 3 characters.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
+      if(!gender){ errEl.textContent='Please select your gender.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
+      if(!loginInput.includes('@')){ errEl.textContent='Enter a valid email address.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
+
+      const checkRes = await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+username+'&select=id', { headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY} });
+      const checkData = await checkRes.json();
+      if(checkData&&checkData.length>0){ errEl.textContent='Username taken.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Create account'; return; }
+
+      const signupRes = await fetch(SUPABASE_URL+'/auth/v1/signup', {
+        method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+        body: JSON.stringify({email:loginInput, password})
+      });
+      const signupData = await signupRes.json();
+      if(!signupRes.ok) throw new Error(signupData.error_description||signupData.msg||'Signup failed');
+
+      const signinRes = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password', {
+        method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+        body: JSON.stringify({email:loginInput, password})
+      });
+      const signinData = await signinRes.json();
+
+      if(signinRes.ok&&signinData.access_token){
+        await fetch(SUPABASE_URL+'/rest/v1/profiles', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+signinData.access_token,'Prefer':'return=minimal'},
+          body: JSON.stringify({id:signinData.user.id, first_name:firstName, last_name:lastName, username, gender, email:loginInput})
+        });
+        const userWithProfile = {...signinData.user, first_name:firstName, last_name:lastName, username, gender};
+        if(rememberMe){ localStorage.setItem('ae_token',signinData.access_token); localStorage.setItem('ae_user',JSON.stringify(userWithProfile)); }
+        else { sessionStorage.setItem('ae_token',signinData.access_token); sessionStorage.setItem('ae_user',JSON.stringify(userWithProfile)); }
+        window.location.href = '/dashboard.html';
       } else {
-        sessionStorage.setItem('ae_token', data.access_token);
-        sessionStorage.setItem('ae_user', JSON.stringify(data.user));
-        localStorage.removeItem('ae_token');
-        localStorage.removeItem('ae_user');
+        sucEl.textContent='Account created! You can now sign in.'; sucEl.style.display='block';
+        switchTab('signin');
       }
+    } else {
+      let email = loginInput;
+      if(!loginInput.includes('@')){
+        const lookupRes = await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+loginInput.toLowerCase()+'&select=email', { headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY} });
+        const lookupData = await lookupRes.json();
+        if(!lookupData||!lookupData.length){ errEl.textContent='Username not found.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Sign in'; return; }
+        email = lookupData[0].email;
+      }
+      const res = await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password', {
+        method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+        body: JSON.stringify({email, password})
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error_description||data.msg||'Wrong email or password');
+
+      const profileRes = await fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+data.user.id+'&select=*', { headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.access_token} });
+      const profileData = await profileRes.json();
+      const profile = profileData&&profileData.length ? profileData[0] : {};
+      const userWithProfile = {...data.user, ...profile};
+
+      if(rememberMe){ localStorage.setItem('ae_token',data.access_token); localStorage.setItem('ae_user',JSON.stringify(userWithProfile)); }
+      else { sessionStorage.setItem('ae_token',data.access_token); sessionStorage.setItem('ae_user',JSON.stringify(userWithProfile)); }
       window.location.href = '/dashboard.html';
     }
   } catch(e){
-    errEl.textContent = e.message || 'Something went wrong. Try again.';
+    errEl.textContent = e.message||'Something went wrong. Try again.';
     errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = currentTab === 'signin' ? 'Sign in' : 'Create account';
   }
+  btn.disabled=false; btn.textContent=currentTab==='signin'?'Sign in':'Create account';
 }
 
 // Close modal on overlay click
