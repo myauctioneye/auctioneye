@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AuctionEye — Know if a lot is a deal or a trap</title>
+<meta name="description" content="Analyze any auction lot in seconds. Real vehicle data, risk flags, and a clear verdict." />
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#185FA5" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="AuctionEye" />
+<link rel="apple-touch-icon" href="/icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root {
+  --blue:#185FA5; --blue-dark:#0C447C; --blue-light:#E6F1FB;
+  --green:#1D9E75; --green-light:#E1F5EE;
+  --amber:#BA7517; --amber-light:#FAEEDA;
+  --red:#E24B4A; --red-light:#FCEBEB;
+  --gray-50:#F8F9FA; --gray-100:#F1F3F5; --gray-200:#E9ECEF;
+  --gray-400:#868E96; --gray-600:#495057; --gray-900:#212529;
+  --border:rgba(0,0,0,0.08); --radius:12px; --radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--gray-50);color:var(--gray-900);min-height:100vh;}
+h1,h2,h3,.logo-text,.verdict-title,.btn-verdict,.btn-analyze{font-family:'Syne',sans-serif;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:var(--radius);padding:2rem;width:100%;max-width:400px;}
+.modal h2{font-size:22px;font-weight:700;margin-bottom:6px;letter-spacing:-0.3px;}
+.modal p{font-size:14px;color:var(--gray-400);margin-bottom:1.5rem;}
+.modal-tabs{display:flex;gap:0;margin-bottom:1.5rem;border:1px solid var(--gray-200);border-radius:var(--radius-sm);overflow:hidden;}
+.modal-tab{flex:1;padding:8px;font-size:14px;font-weight:500;border:none;background:transparent;cursor:pointer;color:var(--gray-400);font-family:'Inter',sans-serif;}
+.modal-tab.active{background:var(--blue);color:#fff;}
+.modal-input{width:100%;padding:11px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:14px;font-family:'Inter',sans-serif;color:var(--gray-900);margin-bottom:10px;}
+.modal-input:focus{outline:none;border-color:var(--blue);}
+.modal-btn{width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;margin-top:4px;}
+.modal-btn:hover{background:var(--blue-dark);}
+.modal-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray-400);margin-top:-8px;}
+.modal-error{background:var(--red-light);color:#A32D2D;border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;}
+.modal-success{background:var(--green-light);color:#0F6E56;border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;}
+
+/* NAV */
+nav{background:#fff;border-bottom:1px solid var(--border);padding:0 1.5rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-icon{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.logo-text{font-size:18px;font-weight:700;color:var(--gray-900);letter-spacing:-0.3px;}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.btn-ghost{padding:7px 16px;font-size:14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--gray-600);cursor:pointer;font-family:'Inter',sans-serif;}
+.btn-ghost:hover{background:var(--gray-100);}
+.btn-primary-sm{padding:7px 16px;font-size:14px;border:none;border-radius:var(--radius-sm);background:var(--blue);color:#fff;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;}
+.btn-primary-sm:hover{background:var(--blue-dark);}
+
+/* USER BADGE */
+.user-badge{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray-600);}
+.plan-badge{font-size:11px;padding:3px 8px;border-radius:999px;font-weight:600;}
+.plan-free{background:var(--gray-100);color:var(--gray-600);}
+.plan-basic{background:var(--blue-light);color:var(--blue);}
+.plan-pro{background:var(--green-light);color:#0F6E56;}
+.plan-dealer{background:#EAF3DE;color:#27500A;}
+
+/* USAGE BAR */
+.usage-bar-wrap{max-width:640px;margin:0 auto;padding:0 1.5rem;margin-bottom:-0.5rem;}
+.usage-bar-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--gray-600);}
+.usage-bar-track{flex:1;height:6px;background:var(--gray-100);border-radius:999px;overflow:hidden;}
+.usage-bar-fill{height:100%;border-radius:999px;background:var(--blue);transition:width 0.3s;}
+.usage-bar-fill.warning{background:var(--amber);}
+.usage-bar-fill.full{background:var(--red);}
+.upgrade-link{color:var(--blue);font-weight:500;cursor:pointer;white-space:nowrap;font-size:12px;}
+
+/* HERO */
+.hero{text-align:center;padding:4rem 1.5rem 2.5rem;max-width:640px;margin:0 auto;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 14px;border-radius:999px;background:var(--blue-light);color:var(--blue);margin-bottom:1.5rem;font-weight:500;}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);}
+.hero h1{font-size:clamp(28px,5vw,46px);font-weight:700;line-height:1.15;letter-spacing:-1px;margin-bottom:1rem;}
+.hero h1 span{color:var(--blue);}
+.hero p{font-size:16px;color:var(--gray-400);line-height:1.7;margin-bottom:2rem;}
+
+/* ANALYZER */
+.analyzer-wrap{max-width:640px;margin:0 auto;padding:0 1.5rem 4rem;}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;}
+.card-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray-400);margin-bottom:1rem;}
+.vin-row{display:flex;gap:8px;}
+.vin-input{flex:1;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:15px;font-family:'Inter',sans-serif;font-weight:500;letter-spacing:0.06em;color:var(--gray-900);background:#fff;text-transform:uppercase;transition:border-color 0.15s;}
+.vin-input:focus{outline:none;border-color:var(--blue);}
+.vin-input::placeholder{color:var(--gray-400);font-weight:400;letter-spacing:0;text-transform:none;}
+.btn-analyze{padding:12px 20px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-analyze:hover{background:var(--blue-dark);}
+.btn-analyze:disabled{opacity:0.5;cursor:not-allowed;}
+.steps{margin-top:1rem;display:none;}
+.step-item{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13px;color:var(--gray-400);}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--gray-200);flex-shrink:0;}
+.step-dot.loading{background:var(--amber);animation:pulse 1s infinite;}
+.step-dot.done{background:var(--green);}
+.step-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+@media(max-width:480px){.grid2{grid-template-columns:1fr;}.grid3{grid-template-columns:1fr 1fr;}.vin-row{flex-direction:column;}.btn-analyze{width:100%;}}
+.field{margin-bottom:12px;}
+.field-label{font-size:12px;color:var(--gray-400);margin-bottom:5px;font-weight:500;}
+select,input[type="number"]{width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:14px;font-family:'Inter',sans-serif;color:var(--gray-900);background:#fff;appearance:none;-webkit-appearance:none;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23868E96' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+select:focus,input[type="number"]:focus{outline:none;border-color:var(--blue);}
+.btn-verdict{width:100%;padding:13px;background:var(--gray-900);color:#fff;border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:700;cursor:pointer;margin-top:4px;}
+.btn-verdict:hover{background:#000;}
+.vehicle-header-name{font-size:22px;font-weight:700;font-family:'Syne',sans-serif;letter-spacing:-0.5px;margin-bottom:8px;}
+.tags{margin-bottom:14px;}
+.tag{display:inline-block;font-size:12px;font-weight:500;padding:4px 10px;border-radius:999px;margin-right:5px;margin-bottom:4px;}
+.tag-blue{background:var(--blue-light);color:var(--blue);}
+.tag-green{background:var(--green-light);color:#0F6E56;}
+.info-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid var(--gray-100);}
+.info-row:last-child{border-bottom:none;}
+.info-key{color:var(--gray-400);}
+.info-val{font-weight:500;color:var(--gray-900);text-align:right;max-width:60%;}
+.verdict-box{border-radius:var(--radius);padding:1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:16px;}
+.v-deal{background:var(--green-light);border:2px solid var(--green);}
+.v-neutral{background:var(--amber-light);border:2px solid var(--amber);}
+.v-trap{background:var(--red-light);border:2px solid var(--red);}
+.verdict-icon{font-size:36px;font-family:'Syne',sans-serif;font-weight:700;min-width:48px;text-align:center;}
+.verdict-title{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
+.verdict-sub{font-size:14px;color:var(--gray-600);margin-top:3px;}
+.c-green{color:var(--green);}.c-amber{color:var(--amber);}.c-red{color:var(--red);}
+.metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1rem;}
+.metric{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;text-align:center;}
+.metric-label{font-size:11px;color:var(--gray-400);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;}
+.metric-value{font-size:22px;font-weight:700;font-family:'Syne',sans-serif;}
+.risk-item{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--gray-600);margin-bottom:10px;line-height:1.5;}
+.risk-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.dot-red{background:var(--red);}.dot-amber{background:var(--amber);}.dot-green{background:var(--green);}
+.ai-analysis{background:var(--gray-50);border-radius:var(--radius-sm);padding:1rem;font-size:14px;color:var(--gray-600);line-height:1.7;border-left:3px solid var(--blue);}
+.source-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--gray-100);color:var(--gray-400);}
+.source-row:last-child{border-bottom:none;}
+.source-free{color:var(--green);font-weight:500;}
+.source-pro{color:var(--amber);font-weight:500;}
+.error-box{background:var(--red-light);border:1px solid var(--red);border-radius:var(--radius-sm);padding:1rem;font-size:13px;color:#A32D2D;margin-top:12px;display:none;}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1rem;}
+.plan-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;}
+.plan-card.featured{border:2px solid var(--blue);}
+.plan-name{font-size:15px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:4px;}
+.plan-price{font-size:24px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:2px;}
+.plan-period{font-size:12px;color:var(--gray-400);margin-bottom:10px;}
+.plan-feature{font-size:12px;color:var(--gray-600);margin-bottom:5px;display:flex;gap:5px;}
+.plan-check{color:var(--green);font-weight:700;}
+.plan-btn{width:100%;padding:8px;margin-top:10px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;border:1px solid var(--blue);color:var(--blue);background:transparent;}
+.plan-btn.filled{background:var(--blue);color:#fff;border:none;}
+.plan-btn:hover{opacity:0.85;}
+.popular-badge{font-size:10px;background:var(--blue-light);color:var(--blue);padding:2px 8px;border-radius:999px;display:inline-block;margin-bottom:6px;font-weight:600;}
+
+footer{text-align:center;padding:2rem;font-size:12px;color:var(--gray-400);border-top:1px solid var(--border);background:#fff;}
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <h2 id="modal-title">Welcome to AuctionEye</h2>
+    <p id="modal-subtitle">Sign in to track your analyses and unlock more features</p>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tab-signin" onclick="switchTab('signin')">Sign in</button>
+      <button class="modal-tab" id="tab-signup" onclick="switchTab('signup')">Sign up</button>
+    </div>
+    <div class="modal-error" id="modal-error"></div>
+    <div class="modal-success" id="modal-success"></div>
+    <input class="modal-input" type="email" id="auth-email" placeholder="your@email.com" />
+    <input class="modal-input" type="password" id="auth-password" placeholder="Password (min 6 characters)" />
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <input type="checkbox" id="remember-me" checked style="width:16px;height:16px;cursor:pointer;accent-color:var(--blue);" />
+      <label for="remember-me" style="font-size:13px;color:var(--gray-600);cursor:pointer;">Remember me</label>
+    </div>
+    <button class="modal-btn" id="auth-btn" onclick="handleAuth()">Sign in</button>
+    <p style="font-size:12px;color:var(--gray-400);text-align:center;margin-top:12px;">Free plan includes 5 analyses per month</p>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div class="modal-overlay" id="upgrade-modal">
+  <div class="modal" style="max-width:560px;">
+    <button class="modal-close" onclick="document.getElementById('upgrade-modal').classList.remove('show')">×</button>
+    <h2>Upgrade AuctionEye</h2>
+    <p>You've used all your analyses this month. Upgrade to keep analyzing lots.</p>
+    <div class="pricing-grid" style="margin-top:1rem;">
+      <div class="plan-card">
+        <div class="plan-name">Basic</div>
+        <div class="plan-price">$19</div>
+        <div class="plan-period">per month</div>
+        <div class="plan-feature"><span class="plan-check">✓</span>30 analyses/mo</div>
+        <div class="plan-feature"><span class="plan-check">✓</span>Local prices</div>
+        <button class="plan-btn" onclick="startCheckout('basic')">Choose Basic</button>
+      </div>
+      <div class="plan-card featured">
+        <div class="popular-badge">Most popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$39</div>
+        <div class="plan-period">per month</div>
+        <div class="plan-feature"><span class="plan-check">✓</span>100 analyses/mo</div>
+        <div class="plan-feature"><span class="plan-check">✓</span>Title history</div>
+        <div class="plan-feature"><span class="plan-check">✓</span>Lot alerts</div>
+        <button class="plan-btn filled" onclick="startCheckout('pro')">Choose Pro</button>
+      </div>
+      <div class="plan-card">
+        <div class="plan-name">Dealer</div>
+        <div class="plan-price">$99</div>
+        <div class="plan-period">per month</div>
+        <div class="plan-feature"><span class="plan-check">✓</span>400 analyses/mo</div>
+        <div class="plan-feature"><span class="plan-check">✓</span>5 team seats</div>
+        <div class="plan-feature"><span class="plan-check">✓</span>API access</div>
+        <button class="plan-btn" onclick="startCheckout('dealer')">Choose Dealer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="9" r="6" stroke="white" stroke-width="1.5"/>
+        <circle cx="9" cy="9" r="2.5" fill="white"/>
+        <line x1="9" y1="1" x2="9" y2="3.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="9" y1="14.5" x2="9" y2="17" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="1" y1="9" x2="3.5" y2="9" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="14.5" y1="9" x2="17" y2="9" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span class="logo-text">AuctionEye</span>
+  </a>
+  <div class="nav-right" id="nav-right">
+    <button class="btn-ghost" onclick="openModal()">Sign in</button>
+    <button class="btn-primary-sm" onclick="openModal('signup')">Start free</button>
+  </div>
+</nav>
+
+<div class="hero" id="hero-section">
+  <div class="hero-badge"><div class="badge-dot"></div>Now in beta — free to try</div>
+  <h1>Know if a lot is a <span>deal or a trap</span> in seconds</h1>
+  <p>Paste any VIN from Copart, IAAI, or a local auction. Get real vehicle data, risk flags, and a clear verdict instantly.</p>
+</div>
+
+<div class="usage-bar-wrap hidden" id="usage-wrap">
+  <div class="usage-bar-card">
+    <span id="usage-text" style="white-space:nowrap;"></span>
+    <div class="usage-bar-track">
+      <div class="usage-bar-fill" id="usage-fill"></div>
+    </div>
+    <span class="upgrade-link" onclick="document.getElementById('upgrade-modal').classList.add('show')">Upgrade</span>
+  </div>
+</div>
+
+<div class="analyzer-wrap">
+  <div class="card">
+    <p class="card-label">Enter the lot VIN</p>
+    <div class="vin-row">
+      <input class="vin-input" type="text" id="vin" placeholder="e.g. 3FA6P0HD6HR238708" maxlength="17" oninput="this.value=this.value.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g,'')" />
+      <button class="btn-analyze" id="lookup-btn" onclick="lookupVIN()">Analyze</button>
+    </div>
+    <div class="steps" id="steps">
+      <div class="step-item"><div class="step-dot" id="d1"></div><span id="s1">Connecting to NHTSA...</span></div>
+      <div class="step-item"><div class="step-dot" id="d2"></div><span id="s2">Estimating market value...</span></div>
+      <div class="step-item"><div class="step-dot" id="d3"></div><span id="s3">Ready</span></div>
+    </div>
+    <div class="error-box" id="error-box"></div>
+  </div>
+
+  <div class="card hidden" id="vehicle-card">
+    <p class="card-label">Vehicle — NHTSA Official Data</p>
+    <div class="vehicle-header-name" id="v-name"></div>
+    <div class="tags" id="v-tags"></div>
+    <div id="v-specs"></div>
+  </div>
+
+  <div class="card hidden" id="bid-card">
+    <p class="card-label">Lot details</p>
+    <div class="grid2">
+      <div class="field"><div class="field-label">Auction source</div>
+        <select id="source"><option>Copart</option><option>IAAI</option><option>Local auction</option><option>Manheim</option><option>Other</option></select>
+      </div>
+      <div class="field"><div class="field-label">Title type</div>
+        <select id="title-type"><option>Clean</option><option>Salvage</option><option>Rebuilt</option><option>Parts only</option><option>Certificate of destruction</option></select>
+      </div>
+    </div>
+    <div class="field"><div class="field-label">Primary damage</div>
+      <select id="damage"><option>Front end</option><option>Rear end</option><option>Side</option><option>Rollover</option><option>Flood / water</option><option>Fire</option><option>Hail</option><option>Mechanical</option><option>Minor dents / scratches</option></select>
+    </div>
+    <div class="grid3">
+      <div class="field"><div class="field-label">Your bid ($)</div><input type="number" id="bid" value="3000" min="0"/></div>
+      <div class="field"><div class="field-label">Repair est. ($)</div><input type="number" id="repair" value="2000" min="0"/></div>
+      <div class="field"><div class="field-label">Market value ($)</div><input type="number" id="market" value="8000" min="0"/></div>
+    </div>
+    <button class="btn-verdict" onclick="analyze()">Get Verdict</button>
+  </div>
+
+  <div id="results" class="hidden">
+    <div class="verdict-box" id="verdict-box">
+      <div class="verdict-icon" id="v-icon"></div>
+      <div><div class="verdict-title" id="v-verdict"></div><div class="verdict-sub" id="v-sub"></div></div>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Total cost</div><div class="metric-value" id="m-total"></div></div>
+      <div class="metric"><div class="metric-label">Margin</div><div class="metric-value" id="m-margin"></div></div>
+      <div class="metric"><div class="metric-label">ROI</div><div class="metric-value" id="m-roi"></div></div>
+    </div>
+    <div class="card"><p class="card-label">Full breakdown</p><div id="breakdown"></div></div>
+    <div class="card"><p class="card-label">Risk factors</p><div id="risks"></div></div>
+    <div class="card"><p class="card-label">AuctionEye analysis</p><div class="ai-analysis" id="ai-text"></div></div>
+    <div class="card">
+      <p class="card-label">Data sources</p>
+      <div class="source-row"><span>Vehicle specs</span><span class="source-free">NHTSA vPIC — free</span></div>
+      <div class="source-row"><span>Title history</span><span class="source-pro">NMVTIS — Pro plan</span></div>
+      <div class="source-row"><span>Local market prices</span><span class="source-pro">Craigslist/FB — Basic+ plan</span></div>
+      <div class="source-row"><span>Market value</span><span>Estimated by make / year</span></div>
+    </div>
+    <div style="text-align:center;margin-top:1.5rem;">
+      <button class="btn-primary-sm" style="padding:12px 28px;font-size:15px;font-family:'Syne',sans-serif;font-weight:700;" onclick="resetApp()">Analyze another lot</button>
+    </div>
+  </div>
+</div>
+
+<footer>myauctioneye.com &nbsp;·&nbsp; Built for serious auction buyers &nbsp;·&nbsp; &copy; 2026 AuctionEye</footer>
+
+<script>
+// SUPABASE
+const SUPABASE_URL = 'https://gwwiuosdyrngtpbxuknq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3d2l1b3NkeXJuZ3RwYnh1a25xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3ODAyODEsImV4cCI6MjA5MTM1NjI4MX0.1C9P21lICqB4_SzCM82YkyalvPF-FaO7t6LhYg1goFM';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// PLAN LIMITS
+const PLAN_LIMITS = { free:5, basic:30, pro:100, dealer:400 };
+const PLAN_LABELS = { free:'Free', basic:'Basic', pro:'Pro', dealer:'Dealer' };
+const PLAN_COLORS = { free:'plan-free', basic:'plan-basic', pro:'plan-pro', dealer:'plan-dealer' };
+
+let currentUser = null;
+let userPlan = 'free';
+let analysesUsed = 0;
+let vData = {};
+let viewingReport = false;
+let currentTab = 'signin';
+
+// AUTH STATE
+// Init on page load
+window.addEventListener('DOMContentLoaded', async function(){
+  const storedUser = localStorage.getItem('ae_user') || sessionStorage.getItem('ae_user');
+  const storedToken = localStorage.getItem('ae_token') || sessionStorage.getItem('ae_token');
+
+  if(storedUser && storedToken){
+    try {
+      const parsed = JSON.parse(storedUser);
+      if(parsed && parsed.id && parsed.email){
+        currentUser = parsed;
+        await loadUserData();
+      } else {
+        throw new Error('Invalid user data');
+      }
+    } catch(e){ 
+      localStorage.removeItem('ae_user'); 
+      localStorage.removeItem('ae_token');
+      sessionStorage.removeItem('ae_user');
+      sessionStorage.removeItem('ae_token');
+      currentUser = null;
+    }
+  }
+  renderNav();
+
+  // Auto-reopen VIN from dashboard (view report - don't count as new analysis)
+  const reopenVin = localStorage.getItem('ae_reopen_vin');
+  if(reopenVin){
+    localStorage.removeItem('ae_reopen_vin');
+    document.getElementById('vin').value = reopenVin;
+    viewingReport = true;
+    setTimeout(()=>{ lookupVIN(); }, 500);
+  }
+});
+
+async function loadUserData(){
+  try {
+    const month = new Date().toISOString().slice(0,7);
+    const key = 'ae_usage_' + currentUser.id + '_' + month;
+    const stored = localStorage.getItem(key);
+    if(stored){
+      const d = JSON.parse(stored);
+      analysesUsed = d.count || 0;
+      userPlan = d.plan || 'free';
+    } else {
+      analysesUsed = 0;
+      userPlan = 'free';
+    }
+    renderUsageBar();
+  } catch(e){
+    console.log('loadUserData error:', e);
+    analysesUsed = 0;
+    userPlan = 'free';
+  }
+}
+
+async function incrementUsage(){
+  const month = new Date().toISOString().slice(0,7);
+  const key = 'ae_usage_' + currentUser.id + '_' + month;
+  const stored = localStorage.getItem(key);
+  const current = stored ? JSON.parse(stored) : { count: 0, plan: 'free' };
+  current.count = (current.count || 0) + 1;
+  localStorage.setItem(key, JSON.stringify(current));
+  analysesUsed = current.count;
+  renderUsageBar();
+}
+
+function renderNav(){
+  const nav = document.getElementById('nav-right');
+  if(currentUser){
+    const limit = PLAN_LIMITS[userPlan];
+    nav.innerHTML = `
+      <div class="user-badge">
+        <span>${currentUser.email.split('@')[0]}</span>
+        <span class="plan-badge ${PLAN_COLORS[userPlan]}">${PLAN_LABELS[userPlan]}</span>
+      </div>
+      <button class="btn-ghost" onclick="gotoDashboard()">Dashboard</button>
+      <button class="btn-ghost" onclick="signOut()">Sign out</button>`;
+    document.getElementById('usage-wrap').classList.remove('hidden');
+    document.getElementById('hero-section').style.paddingTop = '2rem';
+  } else {
+    nav.innerHTML = `
+      <button class="btn-ghost" onclick="openModal()">Sign in</button>
+      <button class="btn-primary-sm" onclick="openModal('signup')">Start free</button>`;
+    document.getElementById('usage-wrap').classList.add('hidden');
+  }
+}
+
+function renderUsageBar(){
+  const limit = PLAN_LIMITS[userPlan];
+  const pct = Math.min(100, (analysesUsed/limit)*100);
+  const fill = document.getElementById('usage-fill');
+  fill.style.width = pct+'%';
+  fill.className = 'usage-bar-fill' + (pct>=100?' full':pct>=80?' warning':'');
+  document.getElementById('usage-text').textContent = `${analysesUsed}/${limit} analyses this month`;
+}
+
+// MODAL
+function openModal(tab='signin'){
+  switchTab(tab);
+  document.getElementById('auth-modal').classList.add('show');
+  document.getElementById('modal-error').style.display='none';
+  document.getElementById('modal-success').style.display='none';
+  document.getElementById('auth-email').value='';
+  document.getElementById('auth-password').value='';
+}
+
+function closeModal(){ document.getElementById('auth-modal').classList.remove('show'); }
+
+function switchTab(tab){
+  currentTab = tab;
+  document.getElementById('tab-signin').className = 'modal-tab'+(tab==='signin'?' active':'');
+  document.getElementById('tab-signup').className = 'modal-tab'+(tab==='signup'?' active':'');
+  document.getElementById('modal-title').textContent = tab==='signin' ? 'Welcome back' : 'Create your account';
+  document.getElementById('modal-subtitle').textContent = tab==='signin' ? 'Sign in to your AuctionEye account' : 'Start with 5 free analyses per month';
+  document.getElementById('auth-btn').textContent = tab==='signin' ? 'Sign in' : 'Create account';
+  document.getElementById('modal-error').style.display='none';
+  document.getElementById('modal-success').style.display='none';
+}
+
+async function handleAuth(){
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const btn = document.getElementById('auth-btn');
+
+  if(!email || !email.includes('@')){ showModalError('Enter a valid email.'); return; }
+  if(!password || password.length < 6){ showModalError('Password must be at least 6 characters.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Please wait...';
+  document.getElementById('modal-error').style.display = 'none';
+  document.getElementById('modal-success').style.display = 'none';
+
+  const endpoint = currentTab === 'signup' ? 'signup' : 'token?grant_type=password';
+  const url = SUPABASE_URL + '/auth/v1/' + endpoint;
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      throw new Error(data.error_description || data.msg || data.message || 'Authentication failed');
+    }
+
+    if(currentTab === 'signup'){
+      const sucEl = document.getElementById('modal-success');
+      sucEl.textContent = 'Account created! You can now sign in.';
+      sucEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Create account';
+    } else {
+      currentUser = data.user;
+      localStorage.setItem('ae_token', data.access_token);
+      localStorage.setItem('ae_user', JSON.stringify(data.user));
+      await loadUserData();
+      renderNav();
+      closeModal();
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    }
+  } catch(e) {
+    showModalError(e.message || 'Something went wrong. Try again.');
+    btn.disabled = false;
+    btn.textContent = currentTab === 'signin' ? 'Sign in' : 'Create account';
+  }
+}
+
+function showModalError(msg){
+  const el=document.getElementById('modal-error');
+  el.textContent=msg; el.style.display='block';
+}
+
+function gotoDashboard(){
+  window.location.href = '/dashboard.html';
+}
+
+async function signOut(){
+  localStorage.removeItem('ae_user');
+  localStorage.removeItem('ae_token');
+  sessionStorage.removeItem('ae_user');
+  sessionStorage.removeItem('ae_token');
+  currentUser=null; userPlan='free'; analysesUsed=0;
+  renderNav();
+}
+
+function startCheckout(plan){
+  alert(`Stripe integration coming soon!\n\nFor now, email myauctioneye@gmail.com with subject "${plan.toUpperCase()} plan" and we'll set you up manually.`);
+}
+
+// ANALYZER
+function fmt(n){ return '$'+Math.round(n).toLocaleString('en-US'); }
+function fmtP(n){ return Math.round(n)+'%'; }
+function setStep(n,state,txt){ document.getElementById('d'+n).className='step-dot '+state; if(txt) document.getElementById('s'+n).textContent=txt; }
+function showEl(id){ document.getElementById(id).classList.remove('hidden'); }
+function hideEl(id){ document.getElementById(id).classList.add('hidden'); }
+
+function resetApp(){
+  hideEl('vehicle-card'); hideEl('bid-card'); hideEl('results');
+  document.getElementById('vin').value='';
+  document.getElementById('steps').style.display='none';
+  document.getElementById('error-box').style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function lookupVIN(){
+  const vin = document.getElementById('vin').value.trim();
+  if(vin.length!==17){ showError('VIN must be exactly 17 characters.'); return; }
+
+  const limit = PLAN_LIMITS[userPlan];
+  if(currentUser && analysesUsed >= limit){
+    document.getElementById('upgrade-modal').classList.add('show');
+    return;
+  }
+
+  hideEl('vehicle-card'); hideEl('bid-card'); hideEl('results');
+  document.getElementById('error-box').style.display='none';
+  document.getElementById('steps').style.display='block';
+
+  const btn=document.getElementById('lookup-btn');
+  btn.disabled=true; btn.textContent='Looking up...';
+
+  setStep(1,'loading','Connecting to NHTSA vPIC API...');
+  setStep(2,'loading','Waiting...'); setStep(3,'loading','Waiting...');
+
+  try {
+    const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/${vin}?format=json`);
+    if(!res.ok) throw new Error('Network error');
+    const json = await res.json();
+    const r = json.Results[0];
+
+    if(!r||!r.Make||r.Make.trim()===''){
+      showError('VIN not found. Please verify it is a valid 17-character US vehicle VIN.');
+      btn.disabled=false; btn.textContent='Analyze'; return;
+    }
+
+    setStep(1,'done','NHTSA: data retrieved');
+
+    const dispL=r.DisplacementL?parseFloat(r.DisplacementL).toFixed(1):null;
+    const cyls=r.EngineCylinders||'';
+    const engineStr=dispL?dispL+'L'+(cyls?' '+cyls+'-cyl':''):(r.EngineConfiguration||'—');
+
+    vData={vin,make:r.Make||'—',model:r.Model||'—',year:r.ModelYear||'—',trim:r.Trim||'',body:r.BodyClass||'—',engine:engineStr,fuel:r.FuelTypePrimary||'—',drive:r.DriveType||'—',transmission:r.TransmissionStyle||'—',doors:r.Doors||'—',plant:r.PlantCity?(r.PlantCity+', '+(r.PlantCountry||'')):'—'};
+
+    setStep(2,'loading','Estimating market value...');
+    await new Promise(r=>setTimeout(r,500));
+
+    const yearNum=parseInt(vData.year)||2018;
+    const age=Math.max(0,2026-yearNum);
+    const bases={'FORD':9500,'TOYOTA':12000,'HONDA':11000,'CHEVROLET':9000,'NISSAN':8500,'GMC':10000,'RAM':11000,'DODGE':8500,'BMW':15000,'MERCEDES-BENZ':17000,'AUDI':13000,'HYUNDAI':8500,'KIA':8000,'JEEP':10500,'SUBARU':10000,'MAZDA':9000,'VOLKSWAGEN':9500,'LEXUS':14000};
+    const base=bases[vData.make.toUpperCase()]||9000;
+    const dep=Math.max(0.25,1-(age*0.09));
+    vData.marketEst=Math.round(base*dep/100)*100;
+    vData.marketLow=Math.round(vData.marketEst*0.83);
+    vData.marketHigh=Math.round(vData.marketEst*1.17);
+    document.getElementById('market').value=vData.marketEst;
+
+    setStep(2,'done','Market value estimated');
+    setStep(3,'done','Ready — enter lot details below');
+
+    if(currentUser && !viewingReport) await incrementUsage();
+  viewingReport = false;
+
+    renderVehicle();
+    document.getElementById('vehicle-card').classList.remove('hidden');
+    document.getElementById('bid-card').classList.remove('hidden');
+    setTimeout(()=>{ document.getElementById('vehicle-card').scrollIntoView({behavior:'smooth',block:'start'}); },100);
+
+  } catch(e){
+    showError('Connection error. Check your internet and try again.');
+    setStep(1,'error','Connection failed');
+  }
+  btn.disabled=false; btn.textContent='Analyze';
+}
+
+function showError(msg){ const el=document.getElementById('error-box'); el.textContent=msg; el.style.display='block'; }
+
+function renderVehicle(){
+  const d=vData;
+  document.getElementById('v-name').textContent=`${d.year} ${d.make} ${d.model}${d.trim?' '+d.trim:''}`;
+  document.getElementById('v-tags').innerHTML=`<span class="tag tag-blue">${d.body}</span><span class="tag tag-blue">${d.engine}</span><span class="tag tag-green">Est. ${fmt(vData.marketLow)} – ${fmt(vData.marketHigh)}</span>`;
+  const specs=[['Engine',d.engine],['Fuel',d.fuel],['Drive',d.drive],['Transmission',d.transmission],['Doors',d.doors],['Assembly plant',d.plant],['Estimated market value',fmt(vData.marketEst)]].filter(([,v])=>v&&v!=='—');
+  document.getElementById('v-specs').innerHTML=specs.map(([k,v])=>`<div class="info-row"><span class="info-key">${k}</span><span class="info-val">${v}</span></div>`).join('');
+}
+
+const dmgRisk={'Front end':2,'Rear end':1,'Side':2,'Rollover':4,'Flood / water':5,'Fire':5,'Hail':1,'Mechanical':3,'Minor dents / scratches':1};
+const titleRisk={'Clean':0,'Salvage':3,'Rebuilt':1,'Parts only':5,'Certificate of destruction':5};
+
+async function analyze(){
+  const source=document.getElementById('source').value;
+  const titleType=document.getElementById('title-type').value;
+  const damage=document.getElementById('damage').value;
+  const bid=parseFloat(document.getElementById('bid').value)||3000;
+  const repair=parseFloat(document.getElementById('repair').value)||2000;
+  const market=parseFloat(document.getElementById('market').value)||vData.marketEst||8000;
+  const fees=Math.round(bid*0.12);
+  const transport=350;
+  const total=bid+fees+repair+transport;
+  const margin=market-total;
+  const roi=(margin/total)*100;
+  const dr=dmgRisk[damage]||2;
+  const tr=titleRisk[titleType]||0;
+  const riskScore=dr+tr+(margin<0?3:0)+(roi>0&&roi<10?1:0);
+
+  let vClass,vTitle,vSub,mc;
+  if(margin>2000&&roi>15&&riskScore<=3){vClass='deal';vTitle='Deal';vSub='Solid margin with manageable risk';mc='green';}
+  else if(margin>0&&riskScore<=5){vClass='neutral';vTitle='Neutral';vSub='Tight margin or elevated risk';mc='amber';}
+  else{vClass='trap';vTitle='Trap';vSub="Numbers don't work — pass on this lot";mc='red';}
+
+  document.getElementById('verdict-box').className='verdict-box v-'+vClass;
+  document.getElementById('v-icon').textContent={deal:'✓',neutral:'~',trap:'✕'}[vClass];
+  document.getElementById('v-icon').className='verdict-icon c-'+mc;
+  document.getElementById('v-verdict').textContent=vTitle;
+  document.getElementById('v-verdict').className='verdict-title c-'+mc;
+  document.getElementById('v-sub').textContent=vSub;
+  document.getElementById('m-total').textContent=fmt(total);
+  document.getElementById('m-total').className='metric-value';
+  document.getElementById('m-margin').textContent=fmt(margin);
+  document.getElementById('m-margin').className='metric-value c-'+mc;
+  document.getElementById('m-roi').textContent=fmtP(roi);
+  document.getElementById('m-roi').className='metric-value c-'+mc;
+
+  document.getElementById('breakdown').innerHTML=[['Vehicle',`${vData.year} ${vData.make} ${vData.model}`],['VIN',vData.vin],['Source',source],['Damage',damage],['Title',titleType],['Bid',fmt(bid)],['Auction fees (~12%)',fmt(fees)],['Repair estimate',fmt(repair)],['Transport',fmt(transport)],['Total cost',fmt(total)],['Market value',fmt(market)],['Potential margin',fmt(margin)]].map(([k,v])=>`<div class="info-row"><span class="info-key">${k}</span><span class="info-val">${v}</span></div>`).join('');
+
+  const risks=[];
+  if(tr>=3)risks.push({c:'red',t:`${titleType} title — complicates resale, requires additional processing`});
+  else if(tr>=1)risks.push({c:'amber',t:`${titleType} title — affects resale price`});
+  if(dr>=4)risks.push({c:'red',t:`${damage} damage — high risk of hidden structural or electrical damage`});
+  else if(dr>=2)risks.push({c:'amber',t:`${damage} damage — repair costs may vary, get a quote first`});
+  if(margin<0)risks.push({c:'red',t:`Negative margin of ${fmt(Math.abs(margin))} — you would lose money at current market price`});
+  if(roi>0&&roi<15)risks.push({c:'amber',t:`ROI of ${fmtP(roi)} — tight margin to absorb surprises`});
+  if(risks.length===0)risks.push({c:'green',t:'No major red flags detected'});
+  document.getElementById('risks').innerHTML=risks.map(r=>`<div class="risk-item"><div class="risk-dot dot-${r.c}"></div><span>${r.t}</span></div>`).join('');
+
+  const aiMap={
+    deal:`This lot makes sense. With a ${fmt(margin)} margin and ${fmtP(roi)} ROI, you have enough cushion to absorb surprises. The ${vData.year} ${vData.make} ${vData.model} has solid demand in the private market. ${damage} damage is manageable — verify structure and mechanical condition before bidding.`,
+    neutral:`This lot is in the gray zone. The ${fmt(margin)} margin exists but is tight — any repair surprise can eliminate it. ${tr>=3?titleType+' title adds cost and processing time. ':''}Only makes sense if you have your own shop or can sell above estimated market value.`,
+    trap:`This lot doesn't work. ${margin<0?'You would pay '+fmt(Math.abs(margin))+' more than net value.':'Accumulated risk exceeds available margin.'} ${tr>=3?titleType+' title combined with '+damage+' damage is a high-risk combination. ':''}To make this work, lower your bid to around ${fmt(Math.max(500,bid-Math.abs(margin)-800))}.`
+  };
+  document.getElementById('ai-text').textContent=aiMap[vClass];
+
+  if(currentUser){
+    const month = new Date().toISOString().slice(0,7);
+    const hkey = 'ae_history_' + currentUser.id + '_' + month;
+    const existing = localStorage.getItem(hkey);
+    const history = existing ? JSON.parse(existing) : [];
+    history.push({
+      vin: vData.vin,
+      vehicle: vData.year + ' ' + vData.make + ' ' + vData.model,
+      verdict: vTitle,
+      margin: margin,
+      date: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric'})
+    });
+    if(history.length > 10) history.shift();
+    localStorage.setItem(hkey, JSON.stringify(history));
+
+    // Save to Supabase
+    try {
+      await fetch(SUPABASE_URL + '/rest/v1/analyses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + (localStorage.getItem('ae_token') || SUPABASE_KEY),
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          vin: vData.vin,
+          vehicle: vData.year + ' ' + vData.make + ' ' + vData.model,
+          year: vData.year,
+          make: vData.make,
+          model: vData.model,
+          damage: damage,
+          title_type: titleType,
+          source: source,
+          bid: bid,
+          repair: repair,
+          market: market,
+          total_cost: total,
+          margin: margin,
+          roi: Math.round(roi),
+          verdict: vTitle
+        })
+      });
+    } catch(e){ console.log('Supabase save error:', e); }
+  }
+
+  showEl('results');
+  setTimeout(()=>{document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});},100);
+}
+
+// Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('/sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>
