@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window._threeReady=false;document.querySelector(".hero").style.cssText+="background:#080E08!important;";</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
@@ -29,17 +30,17 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .btn-cta:hover{background:#A3E635;}
 
 /* HERO */
-.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
-#three-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;}
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:#080E08;}
+#three-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block;}
 .hero-overlay-radial{position:absolute;inset:0;background:radial-gradient(ellipse 80% 55% at 50% 48%,rgba(8,14,8,0) 15%,rgba(8,14,8,0.62) 65%,rgba(8,14,8,0.97) 100%);z-index:1;pointer-events:none;}
 .hero-overlay-bottom{position:absolute;bottom:0;left:0;right:0;height:42%;background:linear-gradient(to top,#080E08 0%,transparent 100%);z-index:1;pointer-events:none;}
-.hero-beam{position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);width:360px;height:65%;background:linear-gradient(to top,rgba(132,204,22,0.14) 0%,transparent 100%);z-index:1;pointer-events:none;filter:blur(32px);}
+.hero-beam{display:none;}
 .hero-content{position:relative;z-index:2;text-align:center;max-width:760px;padding:9rem 2rem 1.5rem;}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;padding:6px 16px;border-radius:999px;background:rgba(132,204,22,0.08);border:1px solid rgba(132,204,22,0.22);color:#84CC16;margin-bottom:2rem;letter-spacing:0.09em;text-transform:uppercase;animation:fadeUp 0.6s ease-out 0.3s both;}
 .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:#84CC16;animation:badgePulse 2.2s ease-in-out infinite;}
 @keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(132,204,22,0.6);}60%{box-shadow:0 0 0 7px rgba(132,204,22,0);}}
 .hero h1{font-size:clamp(44px,8.5vw,96px);font-weight:800;line-height:1.0;letter-spacing:-3px;margin-bottom:1.5rem;color:#fff;animation:fadeUp 0.7s ease-out 0.5s both;}
-.hero h1 .accent{color:#84CC16;display:inline-block;position:relative;text-shadow:0 0 30px rgba(132,204,22,0.5);}
+.hero h1 .accent{color:#84CC16 !important;-webkit-text-fill-color:#84CC16 !important;display:inline-block;position:relative;text-shadow:0 0 30px rgba(132,204,22,0.5);}
 .hero h1 .accent::after{content:'';position:absolute;bottom:-3px;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#84CC16,transparent);border-radius:2px;opacity:0.6;}
 .hero-sub{font-size:18px;color:rgba(255,255,255,0.42);line-height:1.7;max-width:520px;margin:0 auto 2.5rem;animation:fadeUp 0.7s ease-out 0.7s both;}
 .hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:1.25rem;animation:fadeUp 0.7s ease-out 0.9s both;}
@@ -189,7 +190,7 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
   <canvas id="three-canvas"></canvas>
   <div class="hero-overlay-radial"></div>
   <div class="hero-overlay-bottom"></div>
-  <div class="hero-beam"></div>
+  
   <div class="hero-content">
     <div class="hero-badge"><div class="hero-badge-dot"></div>Now in beta &mdash; free to try</div>
     <h1>Stop guessing.<br>Start <span class="accent">winning</span><br>at auction.</h1>
@@ -354,7 +355,7 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 <footer>
   <div class="footer-inner">
     <a class="footer-logo" href="/"><div class="footer-logo-icon"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="white" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" fill="white"/></svg></div><span class="footer-logo-text">AuctionEye</span></a>
-    <div class="footer-links"><a class="footer-link" href="#pricing">Pricing</a><a class="footer-link" href="#faq">FAQ</a><a class="footer-link" href="/cdn-cgi/l/email-protection#8ee3f7effbedfae7e1e0ebf7ebcee9e3efe7e2a0ede1e3">Contact</a></div>
+    <div class="footer-links"><a class="footer-link" href="#pricing">Pricing</a><a class="footer-link" href="#faq">FAQ</a><a class="footer-link" href="/cdn-cgi/l/email-protection#036e7a627660776a6c6d667a6643646e626a6f2d606c6e">Contact</a></div>
     <div class="footer-copy">© 2026 AuctionEye · myauctioneye.com</div>
   </div>
 </footer>
@@ -397,172 +398,13 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
   </div>
 </div>
 
-<!-- THREE.JS NIGHT HIGHWAY -->
-<script>
+<!-- THREE.JS 3D BACKGROUND -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 (function(){
-  const canvas = document.getElementById('three-canvas');
-  if(!canvas || !window.THREE) return;
-
-  const W = canvas.offsetWidth || window.innerWidth;
-  const H = canvas.offsetHeight || window.innerHeight;
-
-  const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.setSize(W, H);
-  renderer.setClearColor(0x080E08, 1);
-
-  const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x080E08, 0.022);
-
-  const camera = new THREE.PerspectiveCamera(65, W/H, 0.1, 200);
-  camera.position.set(0, 7, 18);
-  camera.lookAt(0, 0, -20);
-
-  // ROAD
-  const roadGeo = new THREE.PlaneGeometry(20, 300);
-  const roadMat = new THREE.MeshLambertMaterial({color:0x111811});
-  const road = new THREE.Mesh(roadGeo, roadMat);
-  road.rotation.x = -Math.PI/2;
-  road.position.z = -100;
-  scene.add(road);
-
-  // LANE MARKERS
-  function makeDash(x, z) {
-    const g = new THREE.PlaneGeometry(0.15, 3);
-    const m = new THREE.MeshBasicMaterial({color:0x888888, transparent:true, opacity:0.5});
-    const mesh = new THREE.Mesh(g, m);
-    mesh.rotation.x = -Math.PI/2;
-    mesh.position.set(x, 0.01, z);
-    scene.add(mesh);
-  }
-  for(let z = -200; z < 20; z += 8) {
-    makeDash(-3.3, z);
-    makeDash(3.3, z);
-  }
-
-  // EDGE STRIPS lime
-  function makeEdge(x) {
-    const g = new THREE.PlaneGeometry(0.25, 300);
-    const m = new THREE.MeshBasicMaterial({color:0x84CC16, transparent:true, opacity:0.3});
-    const mesh = new THREE.Mesh(g, m);
-    mesh.rotation.x = -Math.PI/2;
-    mesh.position.set(x, 0.01, -100);
-    scene.add(mesh);
-  }
-  makeEdge(-9.5); makeEdge(9.5);
-
-  // STARS
-  const starGeo = new THREE.BufferGeometry();
-  const starPos = new Float32Array(600);
-  for(let i=0;i<600;i+=3){
-    starPos[i]=(Math.random()-0.5)*200;
-    starPos[i+1]=Math.random()*40+5;
-    starPos[i+2]=(Math.random()-0.5)*200-50;
-  }
-  starGeo.setAttribute('position',new THREE.BufferAttribute(starPos,3));
-  const starMat = new THREE.PointsMaterial({color:0xffffff,size:0.15,transparent:true,opacity:0.6});
-  scene.add(new THREE.Points(starGeo,starMat));
-
-  // LIGHTS
-  scene.add(new THREE.AmbientLight(0x1a2a1a, 1));
-  const hLight = new THREE.PointLight(0x84CC16, 2, 60);
-  hLight.position.set(0,10,-30);
-  scene.add(hLight);
-
-  // CARS
-  const cars = [];
-  const laneXs = [-6.5, -3.3, 0, 3.3, 6.5];
-
-  function makeCar(lane, direction, z) {
-    const group = new THREE.Group();
-    const isAway = direction === 1; // moving away = taillights red
-    const coreColor = isAway ? 0xFF2200 : 0xFFDD88;
-    const glowColor = isAway ? 0xFF0000 : 0xFFAA00;
-
-    // 3 glow spheres
-    [0.35, 0.65, 1.0].forEach((r, i) => {
-      const g = new THREE.SphereGeometry(r * 0.25, 8, 8);
-      const m = new THREE.MeshBasicMaterial({
-        color: i===0 ? coreColor : glowColor,
-        transparent:true,
-        opacity: [0.9, 0.4, 0.15][i]
-      });
-      group.add(new THREE.Mesh(g, m));
-    });
-
-    // Trail
-    const trailPositions = new Float32Array(55 * 3);
-    const trailGeo = new THREE.BufferGeometry();
-    trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
-    const trailMat = new THREE.LineBasicMaterial({
-      color: isAway ? 0xFF2200 : 0xFFCC44,
-      transparent:true, opacity:0.35
-    });
-    const trail = new THREE.Line(trailGeo, trailMat);
-    scene.add(trail);
-
-    group.position.set(laneXs[lane], 0.3, z);
-    scene.add(group);
-
-    cars.push({
-      mesh: group, trail, trailPositions,
-      direction, speed: 0.25 + Math.random()*0.15,
-      lane, history:[]
-    });
-  }
-
-  // Away cars (taillights)
-  for(let i=0;i<12;i++) makeCar(Math.floor(Math.random()*2)+3, 1, -Math.random()*120);
-  // Toward cars (headlights)
-  for(let i=0;i<12;i++) makeCar(Math.floor(Math.random()*2), -1, -Math.random()*120);
-
-  // Mouse parallax
-  let mx=0, my=0;
-  document.addEventListener('mousemove', e=>{
-    mx=(e.clientX/window.innerWidth-0.5)*2;
-    my=(e.clientY/window.innerHeight-0.5)*1;
-  });
-
-  window.addEventListener('resize',()=>{
-    const w=canvas.offsetWidth, h=canvas.offsetHeight;
-    renderer.setSize(w,h);
-    camera.aspect=w/h;
-    camera.updateProjectionMatrix();
-  });
-
-  function animate(){
-    requestAnimationFrame(animate);
-
-    cars.forEach(c=>{
-      c.mesh.position.z += c.speed * c.direction;
-      // Reset
-      if(c.direction===1 && c.mesh.position.z > 25) c.mesh.position.z = -180;
-      if(c.direction===-1 && c.mesh.position.z > 25) c.mesh.position.z = -180;
-
-      // Trail
-      c.history.push(c.mesh.position.z);
-      if(c.history.length > 55) c.history.shift();
-      for(let i=0;i<c.history.length;i++){
-        c.trailPositions[i*3] = c.mesh.position.x;
-        c.trailPositions[i*3+1] = c.mesh.position.y;
-        c.trailPositions[i*3+2] = c.history[i];
-      }
-      c.trail.geometry.attributes.position.needsUpdate = true;
-      c.trail.geometry.setDrawRange(0, c.history.length);
-    });
-
-    // Camera parallax
-    camera.position.x += (mx*1.5 - camera.position.x)*0.03;
-    camera.position.y += (7 - my*0.8 - camera.position.y)*0.03;
-    camera.lookAt(0,0,-20);
-
-    renderer.render(scene, camera);
-  }
-  animate();
-})();
-</script>
-<script>
-(function(){
+  // Ensure dark background always
+  const heroEl = document.querySelector('.hero');
+  if(heroEl) heroEl.style.background = '#080E08';
+  document.querySelector('.hero').style.background = '#080E08';
   const canvas = document.getElementById('three-canvas');
   if(!canvas || !window.THREE) return;
   const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
@@ -787,6 +629,10 @@ async function handleSignUp(){
 <!-- THREE.JS NIGHT HIGHWAY -->
 <script>
 (function(){
+  // Ensure dark background always
+  const heroEl = document.querySelector('.hero');
+  if(heroEl) heroEl.style.background = '#080E08';
+  document.querySelector('.hero').style.background = '#080E08';
   const canvas = document.getElementById('three-canvas');
   if(!canvas || !window.THREE) return;
   const W = canvas.offsetWidth || window.innerWidth;
