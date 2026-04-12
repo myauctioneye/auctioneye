@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AuctionEye — Know if a lot is a deal or a trap</title>
+<meta name="description" content="Analyze any Copart or IAAI lot in seconds. Real vehicle data, risk flags, profit margin, and a clear verdict instantly."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--blue:#185FA5;--blue-dark:#0C447C;--blue-mid:#1A6FBE;--green:#1D9E75;--red:#E24B4A;--amber:#BA7517;--radius:16px;--radius-sm:10px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:#0D1117;color:#fff;overflow-x:hidden;}
+h1,h2,h3,h4,.logo-text,.syne{font-family:'Syne',sans-serif;}
+
+/* NOISE */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:64px;background:rgba(13,17,23,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06);}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#185FA5,#1A6FBE);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(24,95,165,0.4);}
+.logo-text{font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.3px;}
+.nav-links{display:flex;align-items:center;gap:2rem;}
+.nav-link{font-size:14px;color:rgba(255,255,255,0.5);text-decoration:none;transition:color 0.2s;}
+.nav-link:hover{color:#fff;}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.btn-ghost{padding:8px 18px;font-size:14px;border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius-sm);background:transparent;color:rgba(255,255,255,0.7);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.08);color:#fff;}
+.btn-cta{padding:8px 18px;font-size:14px;font-weight:600;border:none;border-radius:var(--radius-sm);background:var(--blue);color:#fff;cursor:pointer;font-family:'Syne',sans-serif;transition:all 0.2s;box-shadow:0 0 20px rgba(24,95,165,0.3);}
+.btn-cta:hover{background:var(--blue-mid);box-shadow:0 0 30px rgba(24,95,165,0.5);}
+
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 5rem;overflow:hidden;}
+.blob{display:none;}
+.blob-1{width:500px;height:500px;background:radial-gradient(circle,rgba(24,95,165,0.25),transparent 70%);top:-100px;left:-100px;animation-delay:0s;}
+.blob-2{width:400px;height:400px;background:radial-gradient(circle,rgba(29,158,117,0.15),transparent 70%);bottom:0;right:-100px;animation-delay:-4s;}
+.blob-3{width:300px;height:300px;background:radial-gradient(circle,rgba(24,95,165,0.1),transparent 70%);top:50%;left:60%;animation-delay:-2s;}
+@keyframes blobFloat{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(30px,-30px) scale(1.05);}66%{transform:translate(-20px,20px) scale(0.95);}}
+.hero::after{content:'';position:absolute;inset:0;pointer-events:none;}
+
+/* ANIMATED PARTICLES */
+.particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.particle{position:absolute;border-radius:50%;animation:particleFloat linear infinite;}
+@keyframes particleFloat{0%{transform:translateY(100vh) translateX(0) scale(0);opacity:0;}10%{opacity:1;}90%{opacity:0.3;}100%{transform:translateY(-100px) translateX(var(--dx)) scale(1);opacity:0;}}
+
+/* AURORA EFFECT */
+.aurora{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.aurora-1{position:absolute;width:900px;height:600px;top:-200px;left:-200px;background:conic-gradient(from 180deg at 40% 60%,rgba(24,95,165,0) 0deg,rgba(24,95,165,0.12) 90deg,rgba(29,158,117,0.08) 180deg,rgba(24,95,165,0) 360deg);border-radius:50%;filter:blur(60px);animation:auroraMove 12s ease-in-out infinite alternate;}
+.aurora-2{position:absolute;width:700px;height:500px;bottom:-150px;right:-150px;background:conic-gradient(from 0deg at 60% 40%,rgba(226,75,74,0) 0deg,rgba(24,95,165,0.08) 120deg,rgba(29,158,117,0.12) 240deg,rgba(226,75,74,0) 360deg);border-radius:50%;filter:blur(80px);animation:auroraMove 15s ease-in-out infinite alternate-reverse;}
+.aurora-3{position:absolute;width:500px;height:400px;top:30%;left:40%;background:radial-gradient(ellipse,rgba(91,164,232,0.06),transparent 70%);filter:blur(40px);animation:auroraMove2 10s ease-in-out infinite;}
+@keyframes auroraMove{0%{transform:translate(0,0) rotate(0deg) scale(1);}100%{transform:translate(60px,40px) rotate(15deg) scale(1.1);}}
+@keyframes auroraMove2{0%,100%{transform:translate(0,0);}50%{transform:translate(-40px,30px);}}
+
+/* GLOW ORBS */
+.orb{position:absolute;border-radius:50%;filter:blur(100px);animation:orbPulse 6s ease-in-out infinite;}
+.orb-1{width:400px;height:400px;background:rgba(24,95,165,0.18);top:5%;left:5%;animation-delay:0s;}
+.orb-2{width:350px;height:350px;background:rgba(29,158,117,0.12);bottom:10%;right:10%;animation-delay:-3s;}
+.orb-3{width:200px;height:200px;background:rgba(91,164,232,0.15);top:50%;left:55%;animation-delay:-1.5s;}
+@keyframes orbPulse{0%,100%{transform:scale(1);opacity:0.8;}50%{transform:scale(1.15);opacity:1;}}
+
+/* SHOOTING STARS */
+.shooting-star{position:absolute;width:2px;height:80px;background:linear-gradient(to bottom,transparent,rgba(91,164,232,0.8),transparent);border-radius:2px;animation:shootStar linear infinite;opacity:0;}
+@keyframes shootStar{0%{transform:translateY(-100px) translateX(0) rotate(25deg);opacity:0;}5%{opacity:1;}40%{opacity:0.6;}100%{transform:translateY(120vh) translateX(200px) rotate(25deg);opacity:0;}}
+.hero-inner{position:relative;z-index:1;max-width:800px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;padding:6px 16px;border-radius:999px;background:rgba(24,95,165,0.15);border:1px solid rgba(24,95,165,0.3);color:#5BA4E8;margin-bottom:2rem;letter-spacing:0.05em;text-transform:uppercase;animation:fadeInDown 0.6s ease both;}
+.badge-pulse{width:6px;height:6px;border-radius:50%;background:#5BA4E8;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.7);}}
+.hero h1{font-size:clamp(40px,7vw,80px);font-weight:800;line-height:1.05;letter-spacing:-3px;margin-bottom:1.5rem;color:#fff;animation:fadeInUp 0.7s ease 0.1s both;}
+.accent{color:transparent;background:linear-gradient(135deg,#5BA4E8,#1D9E75);-webkit-background-clip:text;background-clip:text;}
+.danger{color:transparent;background:linear-gradient(135deg,#E24B4A,#FF8080);-webkit-background-clip:text;background-clip:text;}
+.hero-sub{font-size:18px;color:rgba(255,255,255,0.5);line-height:1.7;max-width:520px;margin:0 auto 2.5rem;animation:fadeInUp 0.7s ease 0.2s both;}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:3rem;animation:fadeInUp 0.7s ease 0.3s both;}
+.btn-hero{padding:15px 32px;font-size:16px;font-weight:700;border-radius:var(--radius-sm);cursor:pointer;font-family:'Syne',sans-serif;text-decoration:none;display:inline-block;transition:all 0.25s;}
+.btn-hero-primary{background:linear-gradient(135deg,var(--blue),var(--blue-mid));color:#fff;border:none;box-shadow:0 4px 30px rgba(24,95,165,0.4);}
+.btn-hero-primary:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(24,95,165,0.6);}
+.btn-hero-secondary{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(10px);}
+.btn-hero-secondary:hover{background:rgba(255,255,255,0.1);color:#fff;}
+.hero-note{font-size:13px;color:rgba(255,255,255,0.3);animation:fadeInUp 0.7s ease 0.4s both;}
+
+/* TICKER */
+.ticker-wrap{width:100%;overflow:hidden;padding:1rem 0;border-top:1px solid rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);margin-top:3rem;animation:fadeInUp 0.7s ease 0.5s both;}
+.ticker{display:flex;animation:ticker 35s linear infinite;width:max-content;}
+.ticker-item{display:flex;align-items:center;gap:10px;padding:0 3rem;font-size:13px;color:rgba(255,255,255,0.4);white-space:nowrap;border-right:1px solid rgba(255,255,255,0.06);}
+.t-deal{color:#1D9E75;font-weight:700;font-family:'Syne',sans-serif;}
+.t-trap{color:#E24B4A;font-weight:700;font-family:'Syne',sans-serif;}
+.t-neutral{color:#BA7517;font-weight:700;font-family:'Syne',sans-serif;}
+.t-vin{font-family:monospace;color:rgba(255,255,255,0.2);}
+@keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+/* AUCTION LOGOS */
+.auctions-section{padding:3.5rem 2rem;text-align:center;}
+.auctions-label{font-size:11px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:1.75rem;}
+.auction-logos{display:flex;align-items:center;justify-content:center;gap:3rem;flex-wrap:wrap;}
+.auction-logo{font-size:16px;font-weight:800;font-family:'Syne',sans-serif;color:rgba(255,255,255,0.15);letter-spacing:-0.5px;transition:color 0.2s;cursor:default;}
+.auction-logo span{font-size:10px;font-weight:400;display:block;text-align:center;color:rgba(255,255,255,0.1);letter-spacing:0.05em;margin-top:2px;}
+.auction-logo:hover{color:rgba(255,255,255,0.4);}
+
+/* MOCK SECTION */
+.mock-section{padding:5rem 2rem;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;}
+.tag{display:inline-block;font-size:11px;font-weight:600;color:var(--blue);background:rgba(24,95,165,0.1);border:1px solid rgba(24,95,165,0.2);padding:4px 12px;border-radius:999px;margin-bottom:1.25rem;letter-spacing:0.06em;text-transform:uppercase;}
+.mock-text h2{font-size:clamp(26px,3.5vw,40px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:1rem;color:#fff;}
+.mock-text p{font-size:16px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:2rem;}
+.mock-features{display:flex;flex-direction:column;gap:12px;}
+.mock-feature{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;transition:all 0.2s;}
+.mock-feature:hover{background:rgba(255,255,255,0.05);border-color:rgba(24,95,165,0.25);}
+.mfi{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mfi-b{background:rgba(24,95,165,0.15);}
+.mfi-a{background:rgba(245,158,11,0.15);}
+.mfi-g{background:rgba(29,158,117,0.15);}
+.mft strong{display:block;font-size:14px;font-weight:600;color:#fff;margin-bottom:2px;}
+.mft span{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.5;}
+.mock-ui{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:1.5rem;backdrop-filter:blur(10px);position:relative;overflow:hidden;}
+.mock-ui::before{content:'';position:absolute;top:-1px;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(24,95,165,0.5),transparent);}
+.mock-vin-row{display:flex;gap:8px;margin-bottom:1rem;}
+.mock-vin-field{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;font-family:monospace;font-size:13px;color:rgba(255,255,255,0.6);transition:opacity 0.3s;}
+.mock-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;font-family:'Syne',sans-serif;white-space:nowrap;box-shadow:0 0 16px rgba(24,95,165,0.3);}
+.mock-result{background:rgba(29,158,117,0.08);border:1.5px solid rgba(29,158,117,0.2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;animation:rPulse 3s ease-in-out infinite;}
+@keyframes rPulse{0%,100%{box-shadow:0 0 0 rgba(29,158,117,0);}50%{box-shadow:0 0 20px rgba(29,158,117,0.12);}}
+.mock-verdict-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.v-icon{width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;}
+.v-label{font-size:20px;font-weight:800;color:var(--green);font-family:'Syne',sans-serif;}
+.v-sub{font-size:12px;color:rgba(255,255,255,0.35);}
+.mock-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem;}
+.mock-metric{background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;text-align:center;}
+.mm-val{font-size:17px;font-weight:800;font-family:'Syne',sans-serif;}
+.mm-lbl{font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;}
+.mm-white{color:#fff;}.mm-green{color:var(--green);}
+.mock-footer{font-size:12px;color:rgba(255,255,255,0.25);display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);}
+
+/* STATS */
+.stats-section{padding:4rem 2rem;background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.05);}
+.stats-inner{max-width:700px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;text-align:center;}
+.stat-val{font-size:52px;font-weight:800;font-family:'Syne',sans-serif;background:linear-gradient(135deg,#fff,rgba(255,255,255,0.5));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:6px;}
+.stat-lbl{font-size:14px;color:rgba(255,255,255,0.35);}
+
+/* SECTION */
+.section{padding:6rem 2rem;max-width:1000px;margin:0 auto;}
+.section h2{font-size:clamp(26px,4vw,42px);font-weight:800;letter-spacing:-1.5px;margin-bottom:1rem;color:#fff;}
+.section .sub{font-size:16px;color:rgba(255,255,255,0.4);max-width:500px;line-height:1.7;}
+
+/* HOW IT WORKS */
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3.5rem;}
+.step-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:2rem;transition:all 0.3s;position:relative;overflow:hidden;}
+.step-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(24,95,165,0.4),transparent);opacity:0;transition:opacity 0.3s;}
+.step-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(24,95,165,0.2);transform:translateY(-4px);}
+.step-card:hover::before{opacity:1;}
+.step-num{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,rgba(24,95,165,0.25),rgba(24,95,165,0.08));border:1px solid rgba(24,95,165,0.25);color:#5BA4E8;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;font-family:'Syne',sans-serif;margin-bottom:1.25rem;}
+.step-title{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:8px;color:#fff;}
+.step-desc{font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;}
+
+/* FEATURES */
+.features-section{padding:6rem 2rem;background:rgba(255,255,255,0.015);border-top:1px solid rgba(255,255,255,0.05);}
+.features-inner{max-width:1000px;margin:0 auto;}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;margin-top:3.5rem;}
+.feature-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:1.75rem;transition:all 0.3s;}
+.feature-card:hover{background:rgba(255,255,255,0.05);transform:translateY(-3px);}
+.feature-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;}
+.fi-blue{background:rgba(24,95,165,0.15);border:1px solid rgba(24,95,165,0.2);}
+.fi-green{background:rgba(29,158,117,0.15);border:1px solid rgba(29,158,117,0.2);}
+.fi-amber{background:rgba(186,117,23,0.15);border:1px solid rgba(186,117,23,0.2);}
+.fi-red{background:rgba(226,75,74,0.15);border:1px solid rgba(226,75,74,0.2);}
+.feature-title{font-size:15px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:8px;color:#fff;}
+.feature-desc{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;}
+
+/* PRICING */
+.pricing-section{padding:6rem 2rem;}
+.pricing-inner{max-width:1000px;margin:0 auto;}
+.pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:3.5rem;}
+.plan-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:1.75rem;display:flex;flex-direction:column;transition:all 0.3s;position:relative;}
+.plan-card:hover{border-color:rgba(255,255,255,0.1);transform:translateY(-4px);}
+.plan-card.featured{background:rgba(24,95,165,0.07);border-color:rgba(24,95,165,0.3);box-shadow:0 0 40px rgba(24,95,165,0.12);}
+.popular-tag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:999px;white-space:nowrap;font-family:'Syne',sans-serif;box-shadow:0 0 16px rgba(24,95,165,0.4);}
+.plan-name{font-size:12px;font-weight:600;color:rgba(255,255,255,0.35);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em;}
+.plan-price{font-size:38px;font-weight:800;font-family:'Syne',sans-serif;letter-spacing:-1.5px;color:#fff;}
+.plan-price span{font-size:14px;font-weight:400;color:rgba(255,255,255,0.3);letter-spacing:0;}
+.plan-desc{font-size:13px;color:rgba(255,255,255,0.35);margin:10px 0 1.25rem;line-height:1.6;}
+.plan-divider{border:none;border-top:1px solid rgba(255,255,255,0.06);margin:1.25rem 0;}
+.plan-features{list-style:none;flex:1;}
+.plan-features li{font-size:13px;color:rgba(255,255,255,0.5);padding:5px 0;display:flex;gap:8px;align-items:flex-start;}
+.check{color:var(--green);font-weight:700;flex-shrink:0;}
+.cross{color:rgba(255,255,255,0.2);flex-shrink:0;}
+.plan-btn{width:100%;padding:12px;margin-top:1.5rem;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:all 0.2s;}
+.plan-btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);}
+.plan-btn-outline:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.2);color:#fff;}
+.plan-btn-filled{background:var(--blue);border:none;color:#fff;box-shadow:0 0 16px rgba(24,95,165,0.3);}
+.plan-btn-filled:hover{background:var(--blue-mid);box-shadow:0 0 28px rgba(24,95,165,0.5);}
+
+/* TESTIMONIALS */
+.testimonials{padding:6rem 2rem;}
+.testimonials-inner{max-width:1000px;margin:0 auto;}
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;margin-top:3.5rem;}
+.testimonial{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:1.75rem;transition:all 0.3s;}
+.testimonial:hover{background:rgba(255,255,255,0.05);transform:translateY(-3px);}
+.stars{color:#F59E0B;font-size:13px;margin-bottom:12px;letter-spacing:2px;}
+.testimonial-text{font-size:14px;color:rgba(255,255,255,0.6);line-height:1.8;margin-bottom:1.25rem;font-style:italic;}
+.testimonial-author{display:flex;align-items:center;gap:10px;}
+.author-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(24,95,165,0.3),rgba(29,158,117,0.2));border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);font-family:'Syne',sans-serif;}
+.author-name{font-size:13px;font-weight:600;color:#fff;}
+.author-title{font-size:12px;color:rgba(255,255,255,0.35);}
+
+/* FAQ */
+.faq-section{padding:6rem 2rem;}
+.faq-inner{max-width:680px;margin:0 auto;}
+.faq-item{border-bottom:1px solid rgba(255,255,255,0.06);padding:1.25rem 0;}
+.faq-q{font-size:15px;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,0.8);transition:color 0.2s;}
+.faq-q:hover{color:#fff;}
+.faq-icon{color:rgba(255,255,255,0.3);font-size:20px;transition:transform 0.25s;}
+.faq-a{font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7;margin-top:10px;display:none;}
+.faq-a.open{display:block;}
+.faq-q.active .faq-icon{transform:rotate(45deg);}
+
+/* FOOTER */
+footer{background:rgba(0,0,0,0.4);border-top:1px solid rgba(255,255,255,0.05);padding:3rem 2rem;}
+.footer-inner{max-width:1000px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;}
+.footer-logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.footer-logo-icon{width:28px;height:28px;background:linear-gradient(135deg,var(--blue),var(--blue-mid));border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.footer-logo-text{font-size:16px;font-weight:700;font-family:'Syne',sans-serif;color:#fff;}
+.footer-links{display:flex;gap:1.5rem;}
+.footer-link{font-size:13px;color:rgba(255,255,255,0.3);text-decoration:none;transition:color 0.2s;}
+.footer-link:hover{color:rgba(255,255,255,0.7);}
+.footer-copy{font-size:12px;color:rgba(255,255,255,0.15);}
+
+/* ANIMATIONS */
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-delay-1{transition-delay:0.1s;}
+.reveal-delay-2{transition-delay:0.2s;}
+.reveal-delay-3{transition-delay:0.3s;}
+.reveal-delay-4{transition-delay:0.4s;}
+
+/* RESPONSIVE */
+@media(max-width:900px){.mock-section{grid-template-columns:1fr;gap:2rem;}.steps-grid{grid-template-columns:1fr;}.pricing-grid{grid-template-columns:1fr 1fr;}.nav-links{display:none;}}
+@media(max-width:480px){.pricing-grid{grid-template-columns:1fr;}.hero h1{letter-spacing:-2px;}.stats-inner{grid-template-columns:1fr;gap:1.5rem;}.footer-inner{flex-direction:column;text-align:center;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">
+    <div class="logo-icon">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="white" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" fill="white"/><line x1="9" y1="1" x2="9" y2="3.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="14.5" x2="9" y2="17" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="9" x2="3.5" y2="9" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="14.5" y1="9" x2="17" y2="9" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <span class="logo-text">AuctionEye</span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="#how">How it works</a>
+    <a class="nav-link" href="#features">Features</a>
+    <a class="nav-link" href="#pricing">Pricing</a>
+    <a class="nav-link" href="#faq">FAQ</a>
+  </div>
+  <div class="nav-right" id="nav-right">
+    <button class="btn-ghost" onclick="openSignIn()">Sign in</button>
+    <button class="btn-cta" onclick="openSignup()">Start free</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <!-- Aurora background -->
+  <div class="aurora">
+    <div class="aurora-1"></div>
+    <div class="aurora-2"></div>
+    <div class="aurora-3"></div>
+  </div>
+  <!-- Glow orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <!-- Shooting stars -->
+  <div class="shooting-star" style="left:15%;animation-duration:4s;animation-delay:0s;"></div>
+  <div class="shooting-star" style="left:35%;animation-duration:6s;animation-delay:2s;"></div>
+  <div class="shooting-star" style="left:60%;animation-duration:5s;animation-delay:4s;"></div>
+  <div class="shooting-star" style="left:80%;animation-duration:7s;animation-delay:1s;"></div>
+  <div class="shooting-star" style="left:50%;animation-duration:4.5s;animation-delay:3s;"></div>
+  <!-- Floating particles canvas -->
+  <canvas id="particles-canvas" style="position:absolute;inset:0;pointer-events:none;"></canvas>
+  <div class="hero-inner" style="display:flex;align-items:center;justify-content:center;gap:3rem;flex-wrap:wrap;max-width:1000px;">
+    <div style="flex:1;min-width:300px;text-align:left;">
+      <div class="hero-badge" style="display:inline-flex;"><div class="badge-pulse"></div>Now in beta — free to try</div>
+      <h1 style="text-align:left;">Know if a lot is a<br><span class="accent">deal</span> or a <span class="danger">trap</span><br>before you bid</h1>
+      <p class="hero-sub" style="text-align:left;margin-left:0;margin-right:0;">Paste any VIN from Copart, IAAI, or a local auction. Get real specs, risk flags, profit margin, and a clear verdict — in seconds.</p>
+      <div class="hero-btns" style="justify-content:flex-start;">
+        <button class="btn-hero btn-hero-primary" onclick="openSignup()">Try it free — no card needed</button>
+        <a class="btn-hero btn-hero-secondary" href="#how">See how it works</a>
+      </div>
+      <p class="hero-note" style="text-align:left;">5 free analyses every month. No credit card required.</p>
+    </div>
+    <div style="flex-shrink:0;position:relative;">
+      <img src="/rabbit.png" alt="AuctionEye mascot" style="width:320px;height:320px;object-fit:cover;object-position:center top;border-radius:50%;mix-blend-mode:lighten;filter:brightness(1.05) contrast(1.05);" />
+      <div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(24,95,165,0.9);backdrop-filter:blur(10px);border:1px solid rgba(91,164,232,0.3);border-radius:999px;padding:6px 18px;white-space:nowrap;">
+        <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;letter-spacing:0.05em;">AuctionEye</span>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;bottom:0;left:0;right:0;overflow:hidden;padding:1rem 0;border-top:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);">
+    <div class="ticker">
+      <div class="ticker-item"><span class="t-vin">1HGCM82633A004352</span>&nbsp;·&nbsp;2003 Honda Accord&nbsp;·&nbsp;<span class="t-deal">✓ DEAL</span>&nbsp;·&nbsp;+$2,100 margin</div>
+      <div class="ticker-item"><span class="t-vin">3FA6P0HD6HR238708</span>&nbsp;·&nbsp;2017 Ford Fusion&nbsp;·&nbsp;<span class="t-trap">✕ TRAP</span>&nbsp;·&nbsp;-$3,310 margin</div>
+      <div class="ticker-item"><span class="t-vin">1G1ZD5ST4JF142603</span>&nbsp;·&nbsp;2018 Chevy Malibu&nbsp;·&nbsp;<span class="t-neutral">~ NEUTRAL</span>&nbsp;·&nbsp;+$480 margin</div>
+      <div class="ticker-item"><span class="t-vin">4T1C11AK9LU857342</span>&nbsp;·&nbsp;2020 Toyota Camry&nbsp;·&nbsp;<span class="t-deal">✓ DEAL</span>&nbsp;·&nbsp;+$3,800 margin</div>
+      <div class="ticker-item"><span class="t-vin">2HKRW2H89KH627584</span>&nbsp;·&nbsp;2019 Honda CR-V&nbsp;·&nbsp;<span class="t-deal">✓ DEAL</span>&nbsp;·&nbsp;+$2,650 margin</div>
+      <div class="ticker-item"><span class="t-vin">5YJSA1E26MF123456</span>&nbsp;·&nbsp;2021 Tesla Model S&nbsp;·&nbsp;<span class="t-trap">✕ TRAP</span>&nbsp;·&nbsp;-$8,200 margin</div>
+      <div class="ticker-item"><span class="t-vin">1HGCM82633A004352</span>&nbsp;·&nbsp;2003 Honda Accord&nbsp;·&nbsp;<span class="t-deal">✓ DEAL</span>&nbsp;·&nbsp;+$2,100 margin</div>
+      <div class="ticker-item"><span class="t-vin">3FA6P0HD6HR238708</span>&nbsp;·&nbsp;2017 Ford Fusion&nbsp;·&nbsp;<span class="t-trap">✕ TRAP</span>&nbsp;·&nbsp;-$3,310 margin</div>
+      <div class="ticker-item"><span class="t-vin">1G1ZD5ST4JF142603</span>&nbsp;·&nbsp;2018 Chevy Malibu&nbsp;·&nbsp;<span class="t-neutral">~ NEUTRAL</span>&nbsp;·&nbsp;+$480 margin</div>
+      <div class="ticker-item"><span class="t-vin">4T1C11AK9LU857342</span>&nbsp;·&nbsp;2020 Toyota Camry&nbsp;·&nbsp;<span class="t-deal">✓ DEAL</span>&nbsp;·&nbsp;+$3,800 margin</div>
+      <div class="ticker-item"><span class="t-vin">2HKRW2H89KH627584</span>&nbsp;·&nbsp;2019 Honda CR-V&nbsp;·&nbsp;<span class="t-deal">✓ DEAL</span>&nbsp;·&nbsp;+$2,650 margin</div>
+      <div class="ticker-item"><span class="t-vin">5YJSA1E26MF123456</span>&nbsp;·&nbsp;2021 Tesla Model S&nbsp;·&nbsp;<span class="t-trap">✕ TRAP</span>&nbsp;·&nbsp;-$8,200 margin</div>
+    </div>
+  </div>
+</div>
+
+<div class="auctions-section">
+  <p class="auctions-label">Works with every major auction platform</p>
+  <div class="auction-logos">
+    <div class="auction-logo">COPART<span>salvage auction</span></div>
+    <div class="auction-logo">IAAI<span>insurance auto</span></div>
+    <div class="auction-logo">MANHEIM<span>dealer auction</span></div>
+    <div class="auction-logo">ADESA<span>wholesale</span></div>
+    <div class="auction-logo">LOCAL<span>any US VIN</span></div>
+  </div>
+</div>
+
+<div class="mock-section reveal" id="how">
+  <div class="mock-text">
+    <div class="tag">How it works</div>
+    <h2>From VIN to verdict in under 10 seconds</h2>
+    <p>Paste the VIN from any Copart or IAAI listing. Tell us your bid and estimated repair cost. We calculate fees, margin, and risk automatically.</p>
+    <div class="mock-features">
+      <div class="mock-feature reveal reveal-delay-1">
+        <div class="mfi mfi-b"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="#5BA4E8" stroke-width="1.5"/><line x1="7" y1="10" x2="13" y2="10" stroke="#5BA4E8" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="7" x2="10" y2="13" stroke="#5BA4E8" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="mft"><strong>Paste the VIN</strong><span>From Copart, IAAI, Manheim, or any local auction. Takes 5 seconds.</span></div>
+      </div>
+      <div class="mock-feature reveal reveal-delay-2">
+        <div class="mfi mfi-a"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 3 L12.5 8 L18 8.5 L14 12.5 L15 18 L10 15 L5 18 L6 12.5 L2 8.5 L7.5 8 Z" stroke="#F59E0B" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+        <div class="mft"><strong>Enter your numbers</strong><span>Your bid, repair estimate, damage type. Auction fees (~12%) calculated automatically.</span></div>
+      </div>
+      <div class="mock-feature reveal reveal-delay-3">
+        <div class="mfi mfi-g"><svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 10.5 L8 13.5 L15 6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="mft"><strong>Get the verdict instantly</strong><span>Deal, Neutral, or Trap — with margin, ROI, and specific risk flags.</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="mock-ui reveal reveal-delay-2">
+    <div class="mock-vin-row">
+      <div class="mock-vin-field" id="mock-vin-display">1HGCM82633A004352</div>
+      <div class="mock-btn">Analyze</div>
+    </div>
+    <div class="mock-result">
+      <div class="mock-verdict-row"><div class="v-icon">✓</div><div><div class="v-label">Deal</div><div class="v-sub">2003 Honda Accord · 4cyl · FWD · Clean title</div></div></div>
+    </div>
+    <div class="mock-metrics">
+      <div class="mock-metric"><div class="mm-val mm-white">$4,350</div><div class="mm-lbl">Total cost</div></div>
+      <div class="mock-metric"><div class="mm-val mm-green">+$2,100</div><div class="mm-lbl">Margin</div></div>
+      <div class="mock-metric"><div class="mm-val mm-green">+48%</div><div class="mm-lbl">ROI</div></div>
+    </div>
+    <div class="mock-footer"><span>Bid $2,800 · Repair $1,200 · Fees $350</span><span style="color:#1D9E75;">Market $6,450</span></div>
+  </div>
+</div>
+
+<div class="stats-section">
+  <div class="stats-inner">
+    <div class="reveal"><div class="stat-val count-up" data-target="10">0</div><div class="stat-lbl">Seconds per analysis</div></div>
+    <div class="reveal reveal-delay-1"><div class="stat-val count-up" data-target="100" data-suffix="%">0%</div><div class="stat-lbl">NHTSA official data</div></div>
+    <div class="reveal reveal-delay-2"><div class="stat-val count-up" data-target="0" data-prefix="$">$0</div><div class="stat-lbl">To get started</div></div>
+  </div>
+</div>
+
+<div class="features-section" id="features">
+  <div class="features-inner">
+    <div class="tag reveal">Features</div>
+    <h2 class="reveal" style="margin-bottom:0.75rem;">Everything you need to bid smart</h2>
+    <p class="reveal" style="font-size:16px;color:rgba(255,255,255,0.4);line-height:1.7;max-width:480px;">Built by someone who actually buys at auction. Not a generic tool.</p>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon fi-blue"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="#5BA4E8" stroke-width="1.5"/><line x1="7" y1="10" x2="13" y2="10" stroke="#5BA4E8" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="7" x2="10" y2="13" stroke="#5BA4E8" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="feature-title">VIN lookup — NHTSA official</div>
+        <div class="feature-desc">Real specs from the US government database. Make, model, engine, drive, fuel — all verified. Same source every dealer uses.</div>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon fi-green"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 14 L6 10 L9 12 L12 6 L15 9 L17 7" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="feature-title">Real profit margin calculator</div>
+        <div class="feature-desc">Exact cost breakdown: bid + auction fees (~12%) + repair + transport. See your real profit before you bid a dollar.</div>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon fi-red"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#E24B4A" stroke-width="1.5"/><line x1="10" y1="7" x2="10" y2="11" stroke="#E24B4A" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="13.5" r="0.75" fill="#E24B4A"/></svg></div>
+        <div class="feature-title">Risk flags — automatically</div>
+        <div class="feature-desc">Flood, fire, rollover, salvage title, high-risk damage — flagged before you commit. Know exactly what you're getting into.</div>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon fi-blue"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10.5 L8 13.5 L15 6.5" stroke="#5BA4E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="feature-title">Deal / Neutral / Trap verdict</div>
+        <div class="feature-desc">No guessing, no maybes. A clear answer every time with the reasoning behind it. Bid confidently or walk away fast.</div>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon fi-amber"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#F59E0B" stroke-width="1.5"/><line x1="10" y1="6" x2="10" y2="10" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="10" x2="13" y2="13" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <div class="feature-title">Title history — Pro & Dealer</div>
+        <div class="feature-desc">Full NMVTIS report. Salvage history, odometer records, insurance totals, every title brand ever issued. Like Carfax, for auction buyers.</div>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon fi-green"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3 L12.5 8 L18 8.5 L14 12.5 L15 18 L10 15 L5 18 L6 12.5 L2 8.5 L7.5 8 Z" stroke="#1D9E75" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+        <div class="feature-title">Local market prices — Basic+</div>
+        <div class="feature-desc">Real listings from Craigslist and Facebook Marketplace in your area. Not national averages — what buyers are actually paying near you.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pricing-section" id="pricing">
+  <div class="pricing-inner">
+    <div style="text-align:center;">
+      <div class="tag reveal">Pricing</div>
+      <h2 class="reveal">Simple, transparent pricing</h2>
+      <p class="reveal" style="font-size:16px;color:rgba(255,255,255,0.4);margin-top:0.75rem;">Start free. Upgrade when you need more.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="plan-card reveal">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0<span>/mo</span></div>
+        <div class="plan-desc">Casual buyers checking the occasional lot.</div>
+        <hr class="plan-divider"/>
+        <ul class="plan-features">
+          <li><span class="check">✓</span>5 analyses per month</li>
+          <li><span class="check">✓</span>VIN lookup — NHTSA data</li>
+          <li><span class="check">✓</span>Profit margin calculator</li>
+          <li><span class="check">✓</span>Risk flags</li>
+          <li><span class="check">✓</span>Deal / Neutral / Trap verdict</li>
+          <li><span class="cross">—</span>Local market prices</li>
+          <li><span class="cross">—</span>Title history (NMVTIS)</li>
+        </ul>
+        <button class="plan-btn plan-btn-outline" onclick="openSignup()">Get started free</button>
+      </div>
+      <div class="plan-card reveal reveal-delay-1">
+        <div class="plan-name">Basic</div>
+        <div class="plan-price">$29<span>/mo</span></div>
+        <div class="plan-desc">Flippers buying a few cars a month who need real data.</div>
+        <hr class="plan-divider"/>
+        <ul class="plan-features">
+          <li><span class="check">✓</span>30 analyses per month</li>
+          <li><span class="check">✓</span>VIN lookup — NHTSA data</li>
+          <li><span class="check">✓</span>Profit margin calculator</li>
+          <li><span class="check">✓</span>Risk flags</li>
+          <li><span class="check">✓</span>Deal / Neutral / Trap verdict</li>
+          <li><span class="check">✓</span>Local market prices</li>
+          <li><span class="cross">—</span>Title history (NMVTIS)</li>
+        </ul>
+        <button class="plan-btn plan-btn-outline" onclick="window.location='https://buy.stripe.com/test_9B6eVc7m1ddkac005Aasg03'">Start Basic</button>
+      </div>
+      <div class="plan-card featured reveal reveal-delay-2">
+        <div class="popular-tag">Most popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$59<span>/mo</span></div>
+        <div class="plan-desc">Serious flippers who need the full picture before every bid.</div>
+        <hr class="plan-divider"/>
+        <ul class="plan-features">
+          <li><span class="check">✓</span>100 analyses per month</li>
+          <li><span class="check">✓</span>VIN lookup — NHTSA data</li>
+          <li><span class="check">✓</span>Profit margin calculator</li>
+          <li><span class="check">✓</span>Risk flags</li>
+          <li><span class="check">✓</span>Deal / Neutral / Trap verdict</li>
+          <li><span class="check">✓</span>Local market prices</li>
+          <li><span class="check">✓</span>Title history (NMVTIS)</li>
+          <li><span class="check">✓</span>Lot alerts by email</li>
+        </ul>
+        <button class="plan-btn plan-btn-filled" onclick="window.location='https://buy.stripe.com/test_6oUfZg5dT0qygAo4lQasg04'">Start Pro</button>
+      </div>
+      <div class="plan-card reveal reveal-delay-3">
+        <div class="plan-name">Dealer</div>
+        <div class="plan-price">$149<span>/mo</span></div>
+        <div class="plan-desc">High-volume dealers and wholesalers across multiple auctions.</div>
+        <hr class="plan-divider"/>
+        <ul class="plan-features">
+          <li><span class="check">✓</span>400 analyses per month</li>
+          <li><span class="check">✓</span>VIN lookup — NHTSA data</li>
+          <li><span class="check">✓</span>Profit margin calculator</li>
+          <li><span class="check">✓</span>Risk flags</li>
+          <li><span class="check">✓</span>Deal / Neutral / Trap verdict</li>
+          <li><span class="check">✓</span>Local market prices</li>
+          <li><span class="check">✓</span>Title history (NMVTIS)</li>
+          <li><span class="check">✓</span>Lot alerts by email</li>
+          <li><span class="check">✓</span>5 team seats</li>
+        </ul>
+        <button class="plan-btn plan-btn-outline" onclick="window.location='https://buy.stripe.com/test_8x2bJ05dT1uCesg9Gaasg05'">Start Dealer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="testimonials">
+  <div class="testimonials-inner">
+    <div style="text-align:center;">
+      <div class="tag reveal">Reviews</div>
+      <h2 class="reveal">Trusted by auction buyers</h2>
+      <p class="reveal" style="font-size:16px;color:rgba(255,255,255,0.4);margin-top:0.75rem;">Real feedback from people who flip for a living.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial reveal">
+        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <div class="testimonial-text">"I used to spend 20 minutes researching each lot on Copart. Now I know in 30 seconds if it's worth bidding. Paid for itself on the first deal."</div>
+        <div class="testimonial-author"><div class="author-avatar">MR</div><div><div class="author-name">Miguel R.</div><div class="author-title">Auto flipper · Miami, FL</div></div></div>
+      </div>
+      <div class="testimonial reveal reveal-delay-1">
+        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <div class="testimonial-text">"The risk flags saved me from buying a flood car that looked clean in the IAAI photos. That alone is worth way more than $59/month."</div>
+        <div class="testimonial-author"><div class="author-avatar">JT</div><div><div class="author-name">James T.</div><div class="author-title">Copart buyer · Orlando, FL</div></div></div>
+      </div>
+      <div class="testimonial reveal reveal-delay-2">
+        <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <div class="testimonial-text">"Finally a tool built for people who actually buy at auction. Not just car shoppers. The margin calculator is exactly what I needed."</div>
+        <div class="testimonial-author"><div class="author-avatar">CR</div><div><div class="author-name">Carlos R.</div><div class="author-title">Dealer · Tampa, FL</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="faq-section" id="faq">
+  <div class="faq-inner">
+    <div style="text-align:center;margin-bottom:3rem;">
+      <div class="tag reveal">FAQ</div>
+      <h2 class="reveal">Common questions</h2>
+    </div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Where does the vehicle data come from? <span class="faq-icon">+</span></div><div class="faq-a">Vehicle specs come directly from the NHTSA vPIC database — the official US government source. Title history comes from NMVTIS, the national motor vehicle title database.</div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Does it work with Copart and IAAI? <span class="faq-icon">+</span></div><div class="faq-a">Yes. Just grab the VIN from the lot listing on Copart or IAAI. AuctionEye works with any US vehicle VIN regardless of which auction platform you use.</div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Can I cancel anytime? <span class="faq-icon">+</span></div><div class="faq-a">Yes — cancel anytime with no fees. Your plan stays active until the end of the billing period.</div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">What's included in the free plan? <span class="faq-icon">+</span></div><div class="faq-a">5 analyses per month with full VIN lookup, profit margin calculation, risk flags, and the Deal/Neutral/Trap verdict. No credit card required.</div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">How accurate is the market value estimate? <span class="faq-icon">+</span></div><div class="faq-a">For free users, the estimate is based on make, model, and year. Pro and Dealer plans also pull real local listings from Craigslist and Facebook Marketplace in your area.</div></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <a class="footer-logo" href="/">
+      <div class="footer-logo-icon"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="white" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" fill="white"/></svg></div>
+      <span class="footer-logo-text">AuctionEye</span>
+    </a>
+    <div class="footer-links">
+      <a class="footer-link" href="#pricing">Pricing</a>
+      <a class="footer-link" href="#faq">FAQ</a>
+      <a class="footer-link" href="mailto:myauctioneye@gmail.com">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 AuctionEye · myauctioneye.com</div>
+  </div>
+</footer>
+
+<!-- SIGNIN MODAL -->
+<div id="signin-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#161B22;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:2rem;width:100%;max-width:400px;position:relative;">
+    <button onclick="document.getElementById('signin-modal').style.display='none'" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:rgba(255,255,255,0.4);">×</button>
+    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;color:#fff;">Welcome back</h2>
+    <p style="font-size:14px;color:rgba(255,255,255,0.4);margin-bottom:1.25rem;">Sign in to your AuctionEye account</p>
+    <div id="si-error" style="background:rgba(226,75,74,0.1);color:#E24B4A;border:1px solid rgba(226,75,74,0.2);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
+    <input id="si-login" type="text" placeholder="Email or username" style="width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.05);margin-bottom:10px;box-sizing:border-box;outline:none;"/>
+    <input id="si-password" type="password" placeholder="Password" style="width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.05);margin-bottom:10px;box-sizing:border-box;outline:none;"/>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;"><input type="checkbox" id="si-remember" checked style="width:16px;height:16px;cursor:pointer;accent-color:#185FA5;"/><label for="si-remember" style="font-size:13px;color:rgba(255,255,255,0.4);cursor:pointer;">Remember me</label></div>
+    <button onclick="handleSignIn()" style="width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;box-shadow:0 0 20px rgba(24,95,165,0.3);" id="si-btn">Sign in</button>
+    <p style="font-size:12px;color:rgba(255,255,255,0.3);text-align:center;margin-top:12px;">Don't have an account? <span onclick="openSignup()" style="color:#5BA4E8;cursor:pointer;font-weight:500;">Sign up free</span></p>
+  </div>
+</div>
+
+<!-- SIGNUP MODAL -->
+<div id="signup-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;">
+  <div style="background:#161B22;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:2rem;width:100%;max-width:400px;position:relative;margin:auto;">
+    <button onclick="document.getElementById('signup-modal').style.display='none'" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:rgba(255,255,255,0.4);">×</button>
+    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;color:#fff;">Create your account</h2>
+    <p style="font-size:14px;color:rgba(255,255,255,0.4);margin-bottom:1.25rem;">Start with 5 free analyses per month</p>
+    <div id="su-error" style="background:rgba(226,75,74,0.1);color:#E24B4A;border:1px solid rgba(226,75,74,0.2);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
+    <div id="su-success" style="background:rgba(29,158,117,0.1);color:#1D9E75;border:1px solid rgba(29,158,117,0.2);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <input id="su-firstname" type="text" placeholder="First name" style="width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.05);box-sizing:border-box;outline:none;"/>
+      <input id="su-lastname" type="text" placeholder="Last name" style="width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.05);box-sizing:border-box;outline:none;"/>
+    </div>
+    <input id="su-username" type="text" placeholder="Username (e.g. carflip99)" style="width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.05);margin-bottom:10px;box-sizing:border-box;outline:none;"/>
+    <select id="su-gender" style="width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:rgba(255,255,255,0.6);background:#1C2128;margin-bottom:10px;box-sizing:border-box;appearance:none;outline:none;">
+      <option value="">Select gender</option>
+      <option value="male">Male (Mr.)</option>
+      <option value="female">Female (Ms.)</option>
+      <option value="nonbinary">Non-binary (Mx.)</option>
+      <option value="trans">Transgender (Mx.)</option>
+      <option value="other">Prefer not to say</option>
+    </select>
+    <input id="su-email" type="email" placeholder="Email address" style="width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.05);margin-bottom:10px;box-sizing:border-box;outline:none;"/>
+    <input id="su-password" type="password" placeholder="Password (min 6 characters)" style="width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.05);margin-bottom:14px;box-sizing:border-box;outline:none;"/>
+    <button onclick="handleSignUp()" style="width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;box-shadow:0 0 20px rgba(24,95,165,0.3);" id="su-btn">Create account</button>
+    <p style="font-size:12px;color:rgba(255,255,255,0.3);text-align:center;margin-top:12px;">Already have an account? <span onclick="openSignIn()" style="color:#5BA4E8;cursor:pointer;font-weight:500;">Sign in</span></p>
+  </div>
+</div>
+
+<script>
+// SCROLL REVEAL
+const observer = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, {threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// COUNT UP
+function animateCount(el){
+  const target=parseInt(el.dataset.target);
+  const prefix=el.dataset.prefix||'';
+  const suffix=el.dataset.suffix||'';
+  const duration=1500;
+  const start=performance.now();
+  function step(now){
+    const p=Math.min((now-start)/duration,1);
+    const e=1-Math.pow(1-p,3);
+    el.textContent=prefix+Math.round(e*target)+suffix;
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+const cObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting&&!e.target.dataset.counted){e.target.dataset.counted=true;animateCount(e.target);}});},{threshold:0.5});
+document.querySelectorAll('.count-up').forEach(el=>cObs.observe(el));
+
+// FAQ
+function toggleFaq(el){el.classList.toggle('active');el.nextElementSibling.classList.toggle('open');}
+
+// PARTICLE CANVAS
+(function(){
+  const canvas = document.getElementById('particles-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let W, H;
+  
+  function resize(){
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  
+  const colors = ['rgba(91,164,232,', 'rgba(29,158,117,', 'rgba(255,255,255,'];
+  
+  for(let i = 0; i < 60; i++){
+    particles.push({
+      x: Math.random() * 1400,
+      y: Math.random() * 800,
+      r: Math.random() * 1.5 + 0.3,
+      dx: (Math.random() - 0.5) * 0.3,
+      dy: (Math.random() - 0.5) * 0.3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: Math.random() * 0.5 + 0.1,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: Math.random() * 0.02 + 0.005
+    });
+  }
+  
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.x += p.dx;
+      p.y += p.dy;
+      p.pulse += p.pulseSpeed;
+      if(p.x < 0) p.x = W;
+      if(p.x > W) p.x = 0;
+      if(p.y < 0) p.y = H;
+      if(p.y > H) p.y = 0;
+      const a = p.alpha * (0.6 + 0.4 * Math.sin(p.pulse));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + a + ')';
+      ctx.fill();
+    });
+    // Draw connections
+    for(let i = 0; i < particles.length; i++){
+      for(let j = i+1; j < particles.length; j++){
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if(dist < 100){
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = 'rgba(91,164,232,' + (0.06 * (1 - dist/100)) + ')';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// MOCK VIN CYCLE
+const vins=['1HGCM82633A004352','3FA6P0HD6HR238708','4T1C11AK9LU857342','2HKRW2H89KH627584'];
+let vi=0;
+setInterval(()=>{
+  vi=(vi+1)%vins.length;
+  const el=document.getElementById('mock-vin-display');
+  if(el){el.style.opacity=0;setTimeout(()=>{el.textContent=vins[vi];el.style.opacity=1;},300);}
+},3000);
+
+// AUTH
+const SUPABASE_URL='https://gwwiuosdyrngtpbxuknq.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3d2l1b3NkeXJuZ3RwYnh1a25xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3ODAyODEsImV4cCI6MjA5MTM1NjI4MX0.1C9P21lICqB4_SzCM82YkyalvPF-FaO7t6LhYg1goFM';
+
+window.addEventListener('DOMContentLoaded',function(){
+  const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  if(stored){try{const nav=document.getElementById('nav-right');if(nav)nav.innerHTML='<a href="/dashboard.html" style="padding:8px 18px;font-size:14px;border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:rgba(255,255,255,0.7);text-decoration:none;">Dashboard</a><a href="/app.html" style="padding:8px 18px;font-size:14px;font-weight:600;border:none;border-radius:10px;background:#185FA5;color:#fff;text-decoration:none;">Analyze a lot</a>';}catch(e){}}
+  document.getElementById('signin-modal').addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
+  document.getElementById('signup-modal').addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
+});
+
+function openSignIn(){const s=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');if(s){window.location.href='/dashboard.html';return;}document.getElementById('signin-modal').style.display='flex';document.getElementById('si-error').style.display='none';document.getElementById('si-login').value='';document.getElementById('si-password').value='';}
+function openSignup(){const s=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');if(s){window.location.href='/dashboard.html';return;}document.getElementById('signup-modal').style.display='flex';document.getElementById('su-error').style.display='none';document.getElementById('su-success').style.display='none';}
+
+async function handleSignIn(){
+  const login=document.getElementById('si-login').value.trim();
+  const password=document.getElementById('si-password').value;
+  const remember=document.getElementById('si-remember').checked;
+  const btn=document.getElementById('si-btn');
+  const err=document.getElementById('si-error');
+  if(!login){err.textContent='Enter your email or username.';err.style.display='block';return;}
+  if(!password||password.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Please wait...';err.style.display='none';
+  try{
+    let email=login;
+    if(!login.includes('@')){
+      const r=await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+login.toLowerCase()+'&select=email',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+      const d=await r.json();
+      if(!d||!d.length){err.textContent='Username not found.';err.style.display='block';btn.disabled=false;btn.textContent='Sign in';return;}
+      email=d[0].email;
+    }
+    const res=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error_description||data.msg||'Wrong email or password');
+    const pRes=await fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+data.user.id+'&select=*',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.access_token}});
+    const pData=await pRes.json();
+    const profile=pData&&pData.length?pData[0]:{};
+    const user={...data.user,...profile};
+    if(remember){localStorage.setItem('ae_token',data.access_token);localStorage.setItem('ae_user',JSON.stringify(user));}
+    else{sessionStorage.setItem('ae_token',data.access_token);sessionStorage.setItem('ae_user',JSON.stringify(user));}
+    window.location.href='/dashboard.html';
+  }catch(e){err.textContent=e.message||'Something went wrong.';err.style.display='block';btn.disabled=false;btn.textContent='Sign in';}
+}
+
+async function handleSignUp(){
+  const firstName=document.getElementById('su-firstname').value.trim();
+  const lastName=document.getElementById('su-lastname').value.trim();
+  const username=document.getElementById('su-username').value.trim().toLowerCase();
+  const gender=document.getElementById('su-gender').value;
+  const email=document.getElementById('su-email').value.trim();
+  const password=document.getElementById('su-password').value;
+  const btn=document.getElementById('su-btn');
+  const err=document.getElementById('su-error');
+  const suc=document.getElementById('su-success');
+  if(!firstName){err.textContent='Enter your first name.';err.style.display='block';return;}
+  if(!lastName){err.textContent='Enter your last name.';err.style.display='block';return;}
+  if(!username||username.length<3){err.textContent='Username must be at least 3 characters.';err.style.display='block';return;}
+  if(!/^[a-z0-9_]+$/.test(username)){err.textContent='Username: letters, numbers and underscores only.';err.style.display='block';return;}
+  if(!gender){err.textContent='Please select your gender.';err.style.display='block';return;}
+  if(!email||!email.includes('@')){err.textContent='Enter a valid email.';err.style.display='block';return;}
+  if(!password||password.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Please wait...';err.style.display='none';suc.style.display='none';
+  try{
+    const chk=await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+username+'&select=id',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const chkD=await chk.json();
+    if(chkD&&chkD.length>0){err.textContent='Username already taken.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';return;}
+    const signupRes=await fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
+    const signupData=await signupRes.json();
+    if(!signupRes.ok)throw new Error(signupData.error_description||signupData.msg||'Signup failed');
+    const siRes=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
+    const siData=await siRes.json();
+    if(siRes.ok&&siData.access_token){
+      await fetch(SUPABASE_URL+'/rest/v1/profiles',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+siData.access_token,'Prefer':'return=minimal'},body:JSON.stringify({id:siData.user.id,first_name:firstName,last_name:lastName,username,gender,email})});
+      const user={...siData.user,first_name:firstName,last_name:lastName,username,gender};
+      localStorage.setItem('ae_token',siData.access_token);localStorage.setItem('ae_user',JSON.stringify(user));
+      window.location.href='/dashboard.html';
+    }else{suc.textContent='Account created! You can now sign in.';suc.style.display='block';btn.disabled=false;btn.textContent='Create account';}
+  }catch(e){err.textContent=e.message||'Something went wrong.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';}
+}
+</script>
+</body>
+</html>

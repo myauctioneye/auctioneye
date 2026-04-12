@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — AuctionEye</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+:root{--blue:#185FA5;--blue-mid:#1A6FBE;--blue-light:rgba(24,95,165,0.12);--green:#1D9E75;--green-light:rgba(29,158,117,0.12);--red:#E24B4A;--red-light:rgba(226,75,74,0.12);--amber:#BA7517;--amber-light:rgba(186,117,23,0.12);--border:rgba(255,255,255,0.07);--radius:16px;--radius-sm:10px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#0D1117;color:#fff;min-height:100vh;}
+h1,h2,h3,h4,.syne{font-family:'Syne',sans-serif;}
+
+/* NAV */
+nav{background:rgba(13,17,23,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#185FA5,#1A6FBE);border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(24,95,165,0.35);}
+.logo-text{font-size:18px;font-weight:700;color:#fff;font-family:'Syne',sans-serif;}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.nav-user{font-size:13px;color:rgba(255,255,255,0.4);}
+.btn-ghost{padding:7px 16px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-sm);background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.btn-ghost:hover{background:rgba(255,255,255,0.06);color:#fff;}
+.btn-blue{padding:7px 16px;font-size:13px;font-weight:600;border:none;border-radius:var(--radius-sm);background:var(--blue);color:#fff;cursor:pointer;font-family:'Syne',sans-serif;text-decoration:none;display:inline-block;transition:all 0.2s;box-shadow:0 0 14px rgba(24,95,165,0.25);}
+.btn-blue:hover{background:var(--blue-mid);}
+
+/* WRAP */
+.wrap{max-width:900px;margin:0 auto;padding:2.5rem 1.5rem;}
+
+/* HEADER */
+.dash-header{margin-bottom:2rem;}
+.dash-header h1{font-size:26px;font-weight:800;letter-spacing:-0.5px;color:#fff;}
+.dash-header p{font-size:14px;color:rgba(255,255,255,0.4);margin-top:3px;}
+
+/* PLAN BANNER */
+.plan-banner{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;position:relative;overflow:hidden;}
+.plan-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(24,95,165,0.4),transparent);}
+.plan-banner-left{display:flex;align-items:center;gap:16px;}
+.plan-icon{width:48px;height:48px;border-radius:12px;background:var(--blue-light);border:1px solid rgba(24,95,165,0.2);display:flex;align-items:center;justify-content:center;}
+.plan-info h2{font-size:17px;font-weight:700;letter-spacing:-0.3px;color:#fff;}
+.plan-info p{font-size:13px;color:rgba(255,255,255,0.4);margin-top:2px;}
+.plan-badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;margin-top:5px;letter-spacing:0.04em;}
+.badge-free{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.5);}
+.badge-basic{background:rgba(24,95,165,0.15);color:#5BA4E8;}
+.badge-pro{background:rgba(29,158,117,0.15);color:#2DD4A4;}
+.badge-dealer{background:rgba(245,158,11,0.15);color:#F5A623;}
+.upgrade-btn{padding:10px 20px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;white-space:nowrap;transition:all 0.2s;box-shadow:0 0 16px rgba(24,95,165,0.25);}
+.upgrade-btn:hover{background:var(--blue-mid);box-shadow:0 0 24px rgba(24,95,165,0.45);}
+
+/* USAGE */
+.usage-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.25rem;}
+.usage-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.usage-title{font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);}
+.usage-count{font-size:13px;font-weight:700;color:#fff;}
+.usage-track{height:6px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden;}
+.usage-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--blue-mid));transition:width 0.8s cubic-bezier(0.4,0,0.2,1);}
+.usage-fill.warn{background:linear-gradient(90deg,var(--amber),#E09400);}
+.usage-fill.full{background:linear-gradient(90deg,var(--red),#FF6B6B);}
+.usage-labels{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.25);margin-top:6px;}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.25rem;}
+.metric-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;position:relative;overflow:hidden;transition:all 0.2s;}
+.metric-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);}
+.metric-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:rgba(255,255,255,0.3);margin-bottom:8px;}
+.metric-value{font-size:32px;font-weight:800;font-family:'Syne',sans-serif;letter-spacing:-1px;color:#fff;}
+.metric-sub{font-size:12px;color:rgba(255,255,255,0.3);margin-top:4px;}
+
+/* PRICING MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:2rem;overflow-y:auto;}
+.modal-overlay.show{display:flex;}
+.modal{background:#161B22;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:2rem;width:100%;max-width:860px;margin:auto;}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;}
+.modal-header h2{font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#fff;}
+.modal-header p{font-size:14px;color:rgba(255,255,255,0.4);margin-top:4px;}
+.modal-close{background:none;border:none;font-size:24px;cursor:pointer;color:rgba(255,255,255,0.4);padding:0;line-height:1;}
+.modal-close:hover{color:#fff;}
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
+.plan-card{border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius);padding:1.5rem;position:relative;display:flex;flex-direction:column;background:rgba(255,255,255,0.03);transition:all 0.2s;}
+.plan-card:hover{border-color:rgba(255,255,255,0.12);}
+.plan-card.featured{border-color:rgba(24,95,165,0.35);background:rgba(24,95,165,0.06);}
+.popular-tag{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:999px;white-space:nowrap;font-family:'Syne',sans-serif;}
+.plan-name{font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;}
+.plan-price{font-size:34px;font-weight:800;font-family:'Syne',sans-serif;letter-spacing:-1px;color:#fff;}
+.plan-price span{font-size:13px;font-weight:400;color:rgba(255,255,255,0.3);letter-spacing:0;}
+.plan-limit{font-size:12px;color:rgba(255,255,255,0.3);margin:6px 0 1rem;}
+.plan-features-list{list-style:none;flex:1;margin-bottom:1rem;}
+.plan-features-list li{font-size:12px;color:rgba(255,255,255,0.5);padding:4px 0;display:flex;gap:6px;}
+.ck{color:var(--green);font-weight:700;}
+.cx{color:rgba(255,255,255,0.2);}
+.plan-select-btn{width:100%;padding:10px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;margin-top:auto;transition:all 0.2s;}
+.btn-outline-blue{background:transparent;border:1px solid rgba(24,95,165,0.4);color:#5BA4E8;}
+.btn-outline-blue:hover{background:rgba(24,95,165,0.12);border-color:rgba(24,95,165,0.6);}
+.btn-filled-blue{background:var(--blue);border:none;color:#fff;box-shadow:0 0 14px rgba(24,95,165,0.25);}
+.btn-filled-blue:hover{background:var(--blue-mid);}
+.current-plan-tag{text-align:center;font-size:11px;color:rgba(255,255,255,0.3);padding:8px;font-weight:500;}
+
+/* ACTIONS */
+.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.25rem;}
+.action-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;display:flex;align-items:center;gap:14px;cursor:pointer;text-decoration:none;color:inherit;transition:all 0.2s;}
+.action-card:hover{background:rgba(255,255,255,0.05);border-color:rgba(24,95,165,0.25);transform:translateY(-2px);}
+.action-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ai-blue{background:rgba(24,95,165,0.15);border:1px solid rgba(24,95,165,0.2);}
+.ai-green{background:rgba(29,158,117,0.15);border:1px solid rgba(29,158,117,0.2);}
+.ai-amber{background:rgba(186,117,23,0.15);border:1px solid rgba(186,117,23,0.2);}
+.action-title{font-size:14px;font-weight:600;font-family:'Syne',sans-serif;color:#fff;}
+.action-sub{font-size:12px;color:rgba(255,255,255,0.35);margin-top:2px;}
+
+/* HISTORY */
+.section-title{font-size:15px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:1rem;color:#fff;}
+.history-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.history-empty{padding:3rem;text-align:center;color:rgba(255,255,255,0.3);font-size:14px;line-height:1.7;}
+.history-item{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid rgba(255,255,255,0.04);gap:1rem;transition:background 0.15s;}
+.history-item:last-child{border-bottom:none;}
+.history-item:hover{background:rgba(255,255,255,0.03);}
+.history-vehicle{font-size:14px;font-weight:600;color:#fff;}
+.history-vin{font-size:11px;color:rgba(255,255,255,0.3);font-family:monospace;margin-top:2px;}
+.history-verdict{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;}
+.v-deal{background:rgba(29,158,117,0.15);color:#2DD4A4;}
+.v-neutral{background:rgba(186,117,23,0.15);color:#F5A623;}
+.v-trap{background:rgba(226,75,74,0.15);color:#FF6B6B;}
+.history-margin{font-size:13px;font-weight:700;text-align:right;}
+.history-date{font-size:11px;color:rgba(255,255,255,0.25);text-align:right;margin-top:2px;}
+
+@media(max-width:600px){.metrics{grid-template-columns:1fr;}.actions{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- UPGRADE MODAL -->
+<div class="modal-overlay" id="upgrade-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div><h2>Upgrade your plan</h2><p>More analyses, more data, more deals found.</p></div>
+      <button class="modal-close" onclick="closeUpgrade()">×</button>
+    </div>
+    <div class="plans-grid">
+      <div class="plan-card" id="card-free">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0<span>/mo</span></div>
+        <div class="plan-limit">5 analyses / month</div>
+        <ul class="plan-features-list">
+          <li><span class="ck">✓</span>VIN lookup</li>
+          <li><span class="ck">✓</span>Margin calculator</li>
+          <li><span class="ck">✓</span>Risk flags</li>
+          <li><span class="cx">—</span>Local prices</li>
+          <li><span class="cx">—</span>Title history</li>
+        </ul>
+        <div class="current-plan-tag" id="free-current" style="display:none;">Current plan</div>
+        <button class="plan-select-btn btn-outline-blue" id="free-btn" onclick="selectPlan('free')" style="display:none;">Downgrade</button>
+      </div>
+      <div class="plan-card" id="card-basic">
+        <div class="plan-name">Basic</div>
+        <div class="plan-price">$29<span>/mo</span></div>
+        <div class="plan-limit">30 analyses / month</div>
+        <ul class="plan-features-list">
+          <li><span class="ck">✓</span>VIN lookup</li>
+          <li><span class="ck">✓</span>Margin calculator</li>
+          <li><span class="ck">✓</span>Risk flags</li>
+          <li><span class="ck">✓</span>Local prices</li>
+          <li><span class="cx">—</span>Title history</li>
+        </ul>
+        <div class="current-plan-tag" id="basic-current" style="display:none;">Current plan</div>
+        <button class="plan-select-btn btn-outline-blue" id="basic-btn" onclick="selectPlan('basic')">Choose Basic</button>
+      </div>
+      <div class="plan-card featured" id="card-pro">
+        <div class="popular-tag">Most popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$59<span>/mo</span></div>
+        <div class="plan-limit">100 analyses / month</div>
+        <ul class="plan-features-list">
+          <li><span class="ck">✓</span>VIN lookup</li>
+          <li><span class="ck">✓</span>Margin calculator</li>
+          <li><span class="ck">✓</span>Risk flags</li>
+          <li><span class="ck">✓</span>Local prices</li>
+          <li><span class="ck">✓</span>Title history</li>
+          <li><span class="ck">✓</span>Lot alerts</li>
+        </ul>
+        <div class="current-plan-tag" id="pro-current" style="display:none;">Current plan</div>
+        <button class="plan-select-btn btn-filled-blue" id="pro-btn" onclick="selectPlan('pro')">Choose Pro</button>
+      </div>
+      <div class="plan-card" id="card-dealer">
+        <div class="plan-name">Dealer</div>
+        <div class="plan-price">$149<span>/mo</span></div>
+        <div class="plan-limit">400 analyses / month</div>
+        <ul class="plan-features-list">
+          <li><span class="ck">✓</span>Everything in Pro</li>
+          <li><span class="ck">✓</span>5 team seats</li>
+          <li><span class="ck">✓</span>API access</li>
+          <li><span class="ck">✓</span>Priority support</li>
+        </ul>
+        <div class="current-plan-tag" id="dealer-current" style="display:none;">Current plan</div>
+        <button class="plan-select-btn btn-outline-blue" id="dealer-btn" onclick="selectPlan('dealer')">Choose Dealer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav>
+  <a class="logo" href="/">
+    <div class="logo-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="white" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" fill="white"/><line x1="9" y1="1" x2="9" y2="3.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="14.5" x2="9" y2="17" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="9" x2="3.5" y2="9" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="14.5" y1="9" x2="17" y2="9" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    <span class="logo-text">AuctionEye</span>
+  </a>
+  <div class="nav-right">
+    <span class="nav-user" id="nav-email"></span>
+    <button class="btn-ghost" onclick="signOut()">Sign out</button>
+    <a class="btn-blue" href="/app.html">Analyze a lot</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="dash-header">
+    <h1 id="greeting">Welcome back</h1>
+    <p id="greeting-sub">Here's your AuctionEye overview</p>
+  </div>
+
+  <div class="plan-banner">
+    <div class="plan-banner-left">
+      <div class="plan-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="#5BA4E8" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="#5BA4E8"/><line x1="12" y1="2" x2="12" y2="5" stroke="#5BA4E8" stroke-width="1.5" stroke-linecap="round"/><line x1="12" y1="19" x2="12" y2="22" stroke="#5BA4E8" stroke-width="1.5" stroke-linecap="round"/><line x1="2" y1="12" x2="5" y2="12" stroke="#5BA4E8" stroke-width="1.5" stroke-linecap="round"/><line x1="19" y1="12" x2="22" y2="12" stroke="#5BA4E8" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="plan-info">
+        <h2 id="plan-title">Loading...</h2>
+        <p id="plan-desc">Loading your plan details</p>
+        <span class="plan-badge badge-free" id="plan-badge">Free</span>
+      </div>
+    </div>
+    <div id="plan-action-btn">
+      <button class="upgrade-btn" onclick="openUpgrade()">Upgrade plan</button>
+    </div>
+  </div>
+
+  <div class="usage-card">
+    <div class="usage-header">
+      <span class="usage-title">Analyses this month</span>
+      <span class="usage-count" id="usage-count">0 / 5</span>
+    </div>
+    <div class="usage-track"><div class="usage-fill" id="usage-fill" style="width:0%"></div></div>
+    <div class="usage-labels"><span>0</span><span id="usage-limit-label">5 analyses</span></div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric-card">
+      <div class="metric-label">Total analyses</div>
+      <div class="metric-value" id="m-total">—</div>
+      <div class="metric-sub">All time</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">This month</div>
+      <div class="metric-value" id="m-month">—</div>
+      <div class="metric-sub" id="m-month-sub">April 2026</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Remaining</div>
+      <div class="metric-value" id="m-remaining" style="color:#2DD4A4;">—</div>
+      <div class="metric-sub">This month</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <a class="action-card" href="/app.html">
+      <div class="action-icon ai-blue"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#5BA4E8" stroke-width="1.5"/><circle cx="10" cy="10" r="2.5" fill="#5BA4E8"/></svg></div>
+      <div><div class="action-title">Analyze a lot</div><div class="action-sub">Paste a VIN and get a verdict</div></div>
+    </a>
+    <div class="action-card" onclick="openUpgrade()">
+      <div class="action-icon ai-green"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4 L12 8 L17 8.5 L13.5 12 L14.5 17 L10 14.5 L5.5 17 L6.5 12 L3 8.5 L8 8 Z" stroke="#2DD4A4" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+      <div><div class="action-title">Upgrade plan</div><div class="action-sub">Get more analyses & features</div></div>
+    </div>
+    <div class="action-card" onclick="openSupport()">
+      <div class="action-icon ai-amber"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="10" rx="2" stroke="#F5A623" stroke-width="1.5"/><path d="M3 7 L10 12 L17 7" stroke="#F5A623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <div><div class="action-title">Contact support</div><div class="action-sub">Get help from our team</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Recent analyses</div>
+  <div class="history-card" id="history-list">
+    <div class="history-empty">Loading your analyses...</div>
+  </div>
+</div>
+
+<!-- REPORT MODAL -->
+<div id="report-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(12px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;">
+  <div style="background:#161B22;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:2rem;width:100%;max-width:520px;margin:auto;position:relative;">
+    <button onclick="closeReport()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:rgba(255,255,255,0.4);">×</button>
+    <div id="report-content"></div>
+  </div>
+</div>
+
+<!-- SUPPORT MODAL -->
+<div id="support-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(12px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#161B22;border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:2rem;width:100%;max-width:460px;position:relative;">
+    <button onclick="closeSupport()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:rgba(255,255,255,0.4);">×</button>
+    <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;color:#fff;">Contact Support</h2>
+    <p style="font-size:14px;color:rgba(255,255,255,0.4);margin-bottom:1.25rem;">We'll get back to you within 24 hours.</p>
+    <div id="support-success" style="background:rgba(29,158,117,0.1);color:#2DD4A4;border:1px solid rgba(29,158,117,0.2);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:none;">Message sent! We'll be in touch soon.</div>
+    <div style="margin-bottom:10px;"><label style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Your name</label><input id="support-name" type="text" placeholder="Your name" style="width:100%;padding:10px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.05);box-sizing:border-box;outline:none;"/></div>
+    <div style="margin-bottom:10px;"><label style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Email</label><input id="support-email" type="email" placeholder="your@email.com" style="width:100%;padding:10px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.05);box-sizing:border-box;outline:none;"/></div>
+    <div style="margin-bottom:10px;"><label style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Subject</label><select id="support-subject" style="width:100%;padding:10px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:rgba(255,255,255,0.6);background:#1C2128;box-sizing:border-box;appearance:none;outline:none;"><option>Billing issue</option><option>Plan upgrade / downgrade</option><option>Technical problem</option><option>Feature request</option><option>Account issue</option><option>Other</option></select></div>
+    <div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Describe your issue</label><textarea id="support-message" placeholder="Tell us what's happening..." rows="4" style="width:100%;padding:10px 14px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.05);box-sizing:border-box;resize:vertical;outline:none;"></textarea></div>
+    <button onclick="sendSupport()" id="support-btn" style="width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;">Send message</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://gwwiuosdyrngtpbxuknq.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3d2l1b3NkeXJuZ3RwYnh1a25xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3ODAyODEsImV4cCI6MjA5MTM1NjI4MX0.1C9P21lICqB4_SzCM82YkyalvPF-FaO7t6LhYg1goFM';
+const {createClient}=supabase;
+const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const PLAN_LIMITS={free:5,basic:30,pro:100,dealer:400};
+const PLAN_NAMES={free:'Free Plan',basic:'Basic Plan',pro:'Pro Plan',dealer:'Dealer Plan'};
+const PLAN_DESCS={free:'5 analyses per month · Basic features',basic:'30 analyses per month · Local prices',pro:'100 analyses per month · Full access',dealer:'400 analyses per month · Team + API'};
+const BADGE_CLASS={free:'badge-free',basic:'badge-basic',pro:'badge-pro',dealer:'badge-dealer'};
+const STRIPE_LINKS={basic:'https://buy.stripe.com/test_9B6eVc7m1ddkac005Aasg03',pro:'https://buy.stripe.com/test_6oUfZg5dT0qygAo4lQasg04',dealer:'https://buy.stripe.com/test_8x2bJ05dT1uCesg9Gaasg05'};
+
+let currentUser=null;
+let userPlan='free';
+let analysesUsed=0;
+
+window.addEventListener('DOMContentLoaded',async function(){
+  document.getElementById('support-modal').addEventListener('click',function(e){if(e.target===this)closeSupport();});
+  const storedUser=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  const storedToken=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token');
+  if(storedUser&&storedToken){
+    try{currentUser=JSON.parse(storedUser);loadDashboard();}
+    catch(e){localStorage.removeItem('ae_user');localStorage.removeItem('ae_token');sessionStorage.removeItem('ae_user');sessionStorage.removeItem('ae_token');window.location.href='/app.html';}
+  }else{window.location.href='/app.html';}
+});
+
+async function loadDashboard(){
+  const email=currentUser.email;
+  const title=currentUser.gender==='male'?'Mr.':currentUser.gender==='female'?'Ms.':(currentUser.gender==='nonbinary'||currentUser.gender==='trans')?'Mx.':'';
+  const fullName=(currentUser.first_name&&currentUser.last_name)?(title?title+' ':'')+currentUser.first_name+' '+currentUser.last_name:email.split('@')[0];
+  document.getElementById('nav-email').textContent=currentUser.username?'@'+currentUser.username:email;
+  document.getElementById('greeting').textContent='Welcome back, '+fullName;
+  const month=new Date().toISOString().slice(0,7);
+  const monthName=new Date().toLocaleString('en-US',{month:'long',year:'numeric'});
+  document.getElementById('m-month-sub').textContent=monthName;
+  document.getElementById('greeting-sub').textContent=monthName+' overview';
+
+  try{
+    const token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token')||SUPABASE_KEY;
+    const usageRes=await fetch(SUPABASE_URL+'/rest/v1/user_usage?user_id=eq.'+currentUser.id+'&month=eq.'+month+'&select=*',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+token}});
+    const usageData=await usageRes.json();
+    if(usageData&&usageData.length>0){analysesUsed=usageData[0].analyses_count||0;userPlan=usageData[0].plan||usageData[0].plsn||'free';}
+    else{analysesUsed=0;userPlan='free';}
+  }catch(e){analysesUsed=0;userPlan='free';}
+
+  const limit=PLAN_LIMITS[userPlan];
+  const remaining=Math.max(0,limit-analysesUsed);
+  const pct=Math.min(100,(analysesUsed/limit)*100);
+
+  document.getElementById('plan-title').textContent=PLAN_NAMES[userPlan];
+  document.getElementById('plan-desc').textContent=PLAN_DESCS[userPlan];
+  const badge=document.getElementById('plan-badge');
+  badge.textContent=userPlan.charAt(0).toUpperCase()+userPlan.slice(1);
+  badge.className='plan-badge '+BADGE_CLASS[userPlan];
+
+  // Show/hide upgrade button
+  const actionBtn=document.getElementById('plan-action-btn');
+  if(userPlan==='pro'||userPlan==='dealer'){
+    actionBtn.innerHTML='<span style="background:rgba(29,158,117,0.15);color:#2DD4A4;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;border:1px solid rgba(29,158,117,0.2);">✓ Active</span>';
+  }
+
+  document.getElementById('usage-count').textContent=analysesUsed+' / '+limit;
+  document.getElementById('usage-limit-label').textContent=limit+' analyses';
+  const fill=document.getElementById('usage-fill');
+  setTimeout(()=>{fill.style.width=pct+'%';},100);
+  fill.className='usage-fill'+(pct>=100?' full':pct>=80?' warn':'');
+
+  document.getElementById('m-total').textContent=analysesUsed;
+  document.getElementById('m-month').textContent=analysesUsed;
+  document.getElementById('m-remaining').textContent=remaining;
+  document.getElementById('m-remaining').style.color=remaining>0?'#2DD4A4':'#FF6B6B';
+
+  renderCurrentPlan();
+  loadHistory();
+}
+
+async function loadHistory(){
+  const list=document.getElementById('history-list');
+  list.innerHTML='<div class="history-empty">Loading...</div>';
+  try{
+    const token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token')||SUPABASE_KEY;
+    const res=await fetch(SUPABASE_URL+'/rest/v1/analyses?user_id=eq.'+currentUser.id+'&order=created_at.desc&limit=10',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+token}});
+    const data=await res.json();
+    if(!data||!data.length){list.innerHTML='<div class="history-empty">No analyses yet.<br><a href="/app.html" style="color:#5BA4E8;font-weight:500;">Start analyzing lots →</a></div>';return;}
+    const seen=new Set();
+    const unique=data.filter(h=>{if(seen.has(h.vin))return false;seen.add(h.vin);return true;});
+    window._analyses=unique;
+    list.innerHTML=unique.map((h,idx)=>{
+      const date=new Date(h.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      const vClass=h.verdict==='Deal'?'deal':h.verdict==='Neutral'?'neutral':'trap';
+      const marginColor=h.margin>0?'#2DD4A4':'#FF6B6B';
+      return `<div class="history-item" onclick="openReport(${idx})" style="cursor:pointer;">
+        <div>
+          <div class="history-vehicle">${h.vehicle||(h.year+' '+h.make+' '+h.model)}</div>
+          <div class="history-vin">${h.vin}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:2px;">${[h.damage,h.title_type].filter(Boolean).join(' · ')}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div><span class="history-verdict v-${vClass}">${h.verdict}</span></div>
+          <div class="history-margin" style="margin-top:4px;color:${marginColor}">${h.margin>0?'+':''}$${Math.abs(Math.round(h.margin)).toLocaleString()}</div>
+          <div class="history-date">${date}</div>
+          <div style="font-size:11px;color:#5BA4E8;margin-top:4px;">View report →</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){list.innerHTML='<div class="history-empty">Could not load history.<br><a href="/app.html" style="color:#5BA4E8;">Start analyzing lots →</a></div>';}
+}
+
+function renderCurrentPlan(){
+  ['free','basic','pro','dealer'].forEach(p=>{
+    const c=document.getElementById(p+'-current');
+    const b=document.getElementById(p+'-btn');
+    if(p===userPlan){if(c)c.style.display='block';if(b)b.style.display='none';}
+    else{if(c)c.style.display='none';if(b)b.style.display='block';}
+  });
+}
+
+function openUpgrade(){const m=document.getElementById('upgrade-modal');if(m)m.classList.add('show');}
+function closeUpgrade(){document.getElementById('upgrade-modal').classList.remove('show');}
+
+function selectPlan(plan){
+  if(plan==='free'){closeUpgrade();return;}
+  const link=STRIPE_LINKS[plan];
+  if(link){const email=currentUser?.email||'';window.location.href=link+'?prefilled_email='+encodeURIComponent(email)+'&client_reference_id='+encodeURIComponent(email);}
+}
+
+async function signOut(){
+  localStorage.removeItem('ae_user');localStorage.removeItem('ae_token');
+  sessionStorage.removeItem('ae_user');sessionStorage.removeItem('ae_token');
+  window.location.href='/index.html';
+}
+
+const params=new URLSearchParams(window.location.search);
+if(params.get('success')){setTimeout(()=>{alert('Payment successful! Your plan has been upgraded.');},500);}
+
+window._analyses=[];
+
+function closeReport(){document.getElementById('report-modal').style.display='none';}
+
+function openReport(idx){
+  const h=window._analyses[idx];
+  if(!h)return;
+  const vColor=h.verdict==='Deal'?'#2DD4A4':h.verdict==='Neutral'?'#F5A623':'#FF6B6B';
+  const vBg=h.verdict==='Deal'?'rgba(29,158,117,0.08)':h.verdict==='Neutral'?'rgba(186,117,23,0.08)':'rgba(226,75,74,0.08)';
+  const vBorder=h.verdict==='Deal'?'rgba(29,158,117,0.3)':h.verdict==='Neutral'?'rgba(186,117,23,0.3)':'rgba(226,75,74,0.3)';
+  const marginColor=h.margin>0?'#2DD4A4':'#FF6B6B';
+  const icon=h.verdict==='Deal'?'✓':h.verdict==='Neutral'?'~':'✕';
+  const date=new Date(h.created_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const fees=Math.round((h.bid||0)*0.12);
+  const summary=h.verdict==='Deal'?`Strong opportunity. ${h.margin>0?'+':''}$${Math.abs(Math.round(h.margin)).toLocaleString()} margin at ${Math.round(h.roi)}% ROI. Risk is manageable.`:h.verdict==='Neutral'?`Borderline. Margin of ${h.margin>0?'+':''}$${Math.abs(Math.round(h.margin)).toLocaleString()} is tight. Proceed with caution.`:`Numbers don't close. You'd lose $${Math.abs(Math.round(h.margin)).toLocaleString()} at current market value. Pass.`;
+
+  document.getElementById('report-content').innerHTML=`
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;">
+      <div>
+        <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:rgba(255,255,255,0.3);margin-bottom:6px;">Lot Report</p>
+        <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;letter-spacing:-0.3px;margin-bottom:3px;color:#fff;">${h.vehicle||''}</h2>
+        <p style="font-family:monospace;font-size:12px;color:rgba(255,255,255,0.3);">${h.vin}</p>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <p style="font-size:11px;color:rgba(255,255,255,0.3);">${date}</p>
+        ${h.title_type?`<p style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.6);margin-top:3px;">Title: ${h.title_type}</p>`:''}
+        ${h.damage?`<p style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:2px;">${h.damage}</p>`:''}
+      </div>
+    </div>
+    <div style="background:${vBg};border-left:3px solid ${vBorder};border-radius:0 10px 10px 0;padding:1rem 1.25rem;margin-bottom:1.25rem;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-size:20px;font-weight:700;color:${vColor};font-family:'Syne',sans-serif;">${icon} ${h.verdict}</span>
+      </div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;">${summary}</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1.25rem;">
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:0.875rem;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Total cost</div>
+        <div style="font-size:17px;font-weight:700;font-family:'Syne',sans-serif;color:#fff;">$${Math.round(h.total_cost||0).toLocaleString()}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:0.875rem;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Margin</div>
+        <div style="font-size:17px;font-weight:700;font-family:'Syne',sans-serif;color:${marginColor};">${h.margin>0?'+':''}$${Math.abs(Math.round(h.margin||0)).toLocaleString()}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:0.875rem;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">ROI</div>
+        <div style="font-size:17px;font-weight:700;font-family:'Syne',sans-serif;color:${marginColor};">${Math.round(h.roi||0)}%</div>
+      </div>
+    </div>
+    ${(h.engine||h.transmission||h.drive||h.fuel)?`
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
+      <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:rgba(255,255,255,0.3);margin-bottom:10px;">Vehicle specs</p>
+      ${[h.engine?['Engine',h.engine]:null,h.transmission?['Transmission',h.transmission]:null,h.drive?['Drive',h.drive]:null,h.fuel?['Fuel',h.fuel]:null].filter(Boolean).map(([k,v],i,arr)=>`
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;${i<arr.length-1?'border-bottom:1px solid rgba(255,255,255,0.04);':''}">
+          <span style="color:rgba(255,255,255,0.35);">${k}</span><span style="font-weight:500;color:rgba(255,255,255,0.8);">${v}</span>
+        </div>`).join('')}
+    </div>`:''}
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
+      <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:rgba(255,255,255,0.3);margin-bottom:10px;">Cost breakdown</p>
+      ${[['Bid','$'+Math.round(h.bid||0).toLocaleString()],['Auction fees (~12%)','$'+fees.toLocaleString()],['Repair estimate','$'+Math.round(h.repair||0).toLocaleString()],['Market value','$'+Math.round(h.market||0).toLocaleString()]].map(([k,v],i,arr)=>`
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;${i<arr.length-1?'border-bottom:1px solid rgba(255,255,255,0.04);':''}">
+          <span style="color:rgba(255,255,255,0.35);">${k}</span><span style="font-weight:500;color:rgba(255,255,255,0.8);">${v}</span>
+        </div>`).join('')}
+    </div>
+    <button onclick="closeReport()" style="width:100%;padding:12px;background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">Done</button>
+  `;
+  document.getElementById('report-modal').style.display='flex';
+}
+
+function openSupport(){
+  document.getElementById('support-modal').style.display='flex';
+  document.getElementById('support-success').style.display='none';
+  if(currentUser){
+    const name=(currentUser.first_name&&currentUser.last_name)?currentUser.first_name+' '+currentUser.last_name:'';
+    document.getElementById('support-name').value=name;
+    document.getElementById('support-email').value=currentUser.email||'';
+  }
+}
+function closeSupport(){document.getElementById('support-modal').style.display='none';}
+
+async function sendSupport(){
+  const name=document.getElementById('support-name').value.trim();
+  const email=document.getElementById('support-email').value.trim();
+  const subject=document.getElementById('support-subject').value;
+  const message=document.getElementById('support-message').value.trim();
+  const btn=document.getElementById('support-btn');
+  if(!name||!email||!message){alert('Please fill in all fields.');return;}
+  btn.disabled=true;btn.textContent='Sending...';
+  try{
+    emailjs.init('JKBS9J66f4lsexByR');
+    await emailjs.send('service_xddemts','template_ra2b7g9',{name,email,title:subject,message,plan:userPlan||'free'});
+    document.getElementById('support-success').style.display='block';
+    document.getElementById('support-message').value='';
+  }catch(e){alert('Error sending. Please email myauctioneye@gmail.com');}
+  btn.disabled=false;btn.textContent='Send message';
+}
+</script>
+</body>
+</html>
