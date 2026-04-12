@@ -7,8 +7,8 @@
 <meta name="description" content="Analyze any Copart or IAAI lot in seconds. Real margin, risk flags, and a clear verdict instantly."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>window._threeReady=false;document.querySelector(".hero").style.cssText+="background:#080E08!important;";</script>
+
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
@@ -31,7 +31,21 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 
 /* HERO */
 .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:#080E08;}
-#three-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block;}
+.hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden;background:#080E08;}
+.hero-bg::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(ellipse 60% 40% at 20% 60%, rgba(77,124,15,0.15) 0%, transparent 60%),
+  radial-gradient(ellipse 50% 35% at 80% 30%, rgba(132,204,22,0.08) 0%, transparent 55%),
+  radial-gradient(ellipse 40% 60% at 50% 100%, rgba(34,197,94,0.06) 0%, transparent 50%);
+}
+.road-line{position:absolute;left:50%;transform:translateX(-50%);width:2px;background:linear-gradient(to bottom,transparent,rgba(132,204,22,0.4),transparent);animation:roadMove 2s linear infinite;}
+.road-line:nth-child(1){height:120px;top:-10%;animation-delay:0s;}
+.road-line:nth-child(2){height:90px;top:20%;animation-delay:0.6s;width:1.5px;}
+.road-line:nth-child(3){height:60px;top:50%;animation-delay:1.2s;width:1px;}
+.road-line:nth-child(4){height:40px;top:70%;animation-delay:1.8s;width:0.5px;}
+@keyframes roadMove{0%{transform:translateX(-50%) scaleY(0);opacity:0;}20%{opacity:1;}100%{transform:translateX(-50%) scaleY(1) translateY(100vh);opacity:0;}}
+.car-light{position:absolute;border-radius:50%;animation:carMove linear infinite;}
+@keyframes carMove{0%{transform:translateY(-50px);opacity:0;}5%{opacity:1;}95%{opacity:0.8;}100%{transform:translateY(110vh);opacity:0;}}
+
 .hero-overlay-radial{position:absolute;inset:0;background:radial-gradient(ellipse 80% 55% at 50% 48%,rgba(8,14,8,0) 15%,rgba(8,14,8,0.62) 65%,rgba(8,14,8,0.97) 100%);z-index:1;pointer-events:none;}
 .hero-overlay-bottom{position:absolute;bottom:0;left:0;right:0;height:42%;background:linear-gradient(to top,#080E08 0%,transparent 100%);z-index:1;pointer-events:none;}
 .hero-beam{display:none;}
@@ -187,7 +201,7 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 
 <!-- HERO — Three.js 3D night highway -->
 <div class="hero">
-  <canvas id="three-canvas"></canvas>
+  
   <div class="hero-overlay-radial"></div>
   <div class="hero-overlay-bottom"></div>
   
@@ -398,400 +412,7 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
   </div>
 </div>
 
-<!-- THREE.JS 3D BACKGROUND -->
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-(function(){
-  // Ensure dark background always
-  const heroEl = document.querySelector('.hero');
-  if(heroEl) heroEl.style.background = '#080E08';
-  document.querySelector('.hero').style.background = '#080E08';
-  const canvas = document.getElementById('three-canvas');
-  if(!canvas || !window.THREE) return;
-  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-  renderer.setClearColor(0x080E08, 1);
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(60, canvas.offsetWidth/canvas.offsetHeight, 0.1, 100);
-  camera.position.z = 5;
-
-  // Floating geometric shapes — VIN/data aesthetic
-  const shapes = [];
-  const geo1 = new THREE.TorusGeometry(0.3, 0.08, 16, 60);
-  const geo2 = new THREE.OctahedronGeometry(0.25);
-  const geo3 = new THREE.TorusKnotGeometry(0.2, 0.06, 80, 16);
-  const geo4 = new THREE.IcosahedronGeometry(0.2);
-
-  const matLime = new THREE.MeshPhongMaterial({color:0x84CC16, transparent:true, opacity:0.15, wireframe:false});
-  const matLimeWire = new THREE.MeshPhongMaterial({color:0x84CC16, transparent:true, opacity:0.4, wireframe:true});
-  const matGreen = new THREE.MeshPhongMaterial({color:0x22C55E, transparent:true, opacity:0.12, wireframe:false});
-  const matGreenWire = new THREE.MeshPhongMaterial({color:0x4D7C0F, transparent:true, opacity:0.3, wireframe:true});
-
-  const configs = [
-    {geo:geo1, mat:matLimeWire, x:-3.5, y:1.5, z:-2, rx:0.003, ry:0.005},
-    {geo:geo2, mat:matLime, x:3.2, y:-1.2, z:-1.5, rx:0.004, ry:0.003},
-    {geo:geo3, mat:matGreenWire, x:2.8, y:1.8, z:-3, rx:0.002, ry:0.006},
-    {geo:geo4, mat:matGreen, x:-3.0, y:-1.8, z:-2, rx:0.005, ry:0.002},
-    {geo:geo1, mat:matGreenWire, x:0.5, y:2.5, z:-4, rx:0.003, ry:0.004},
-    {geo:geo2, mat:matLimeWire, x:-1.5, y:-2.5, z:-3, rx:0.006, ry:0.003},
-    {geo:geo4, mat:matLime, x:4.0, y:0.5, z:-4, rx:0.002, ry:0.005},
-    {geo:geo3, mat:matGreen, x:-4.0, y:0, z:-3, rx:0.004, ry:0.003},
-  ];
-
-  configs.forEach(c => {
-    const mesh = new THREE.Mesh(c.geo, c.mat);
-    mesh.position.set(c.x, c.y, c.z);
-    mesh.userData = c;
-    scene.add(mesh);
-    shapes.push(mesh);
-  });
-
-  // Floating particles
-  const particleGeo = new THREE.BufferGeometry();
-  const count = 120;
-  const positions = new Float32Array(count * 3);
-  for(let i = 0; i < count * 3; i++) positions[i] = (Math.random() - 0.5) * 12;
-  particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  const particleMat = new THREE.PointsMaterial({color:0x84CC16, size:0.025, transparent:true, opacity:0.4});
-  const particles = new THREE.Points(particleGeo, particleMat);
-  scene.add(particles);
-
-  // Lights
-  const ambientLight = new THREE.AmbientLight(0x84CC16, 0.3);
-  scene.add(ambientLight);
-  const pointLight = new THREE.PointLight(0x84CC16, 1, 20);
-  pointLight.position.set(2, 3, 4);
-  scene.add(pointLight);
-  const pointLight2 = new THREE.PointLight(0x22C55E, 0.5, 20);
-  pointLight2.position.set(-3, -2, 2);
-  scene.add(pointLight2);
-
-  // Mouse parallax
-  let mouseX = 0, mouseY = 0;
-  document.addEventListener('mousemove', e => {
-    mouseX = (e.clientX / window.innerWidth - 0.5) * 0.5;
-    mouseY = (e.clientY / window.innerHeight - 0.5) * 0.3;
-  });
-
-  window.addEventListener('resize', () => {
-    const w = canvas.offsetWidth, h = canvas.offsetHeight;
-    renderer.setSize(w, h);
-    camera.aspect = w/h;
-    camera.updateProjectionMatrix();
-  });
-
-  let t = 0;
-  function animate() {
-    requestAnimationFrame(animate);
-    t += 0.005;
-    shapes.forEach((mesh, i) => {
-      mesh.rotation.x += mesh.userData.rx;
-      mesh.rotation.y += mesh.userData.ry;
-      mesh.position.y += Math.sin(t + i) * 0.001;
-    });
-    particles.rotation.y += 0.0003;
-    camera.position.x += (mouseX - camera.position.x) * 0.02;
-    camera.position.y += (-mouseY - camera.position.y) * 0.02;
-    camera.lookAt(scene.position);
-    renderer.render(scene, camera);
-  }
-  animate();
-})();
-</script>
-
-<!-- FAQ + AUTH -->
-<script>
-function toggleFaq(el){el.classList.toggle('active');el.nextElementSibling.classList.toggle('open');}
-const SUPABASE_URL='https://gwwiuosdyrngtpbxuknq.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3d2l1b3NkeXJuZ3RwYnh1a25xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3ODAyODEsImV4cCI6MjA5MTM1NjI4MX0.1C9P21lICqB4_SzCM82YkyalvPF-FaO7t6LhYg1goFM';
-
-window.addEventListener('DOMContentLoaded',function(){
-  const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
-  if(stored){try{const nav=document.getElementById('nav-right');if(nav)nav.innerHTML='<a href="/dashboard.html" style="padding:8px 18px;font-size:14px;border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:rgba(255,255,255,0.7);text-decoration:none;">Dashboard</a><a href="/app.html" style="padding:8px 18px;font-size:14px;font-weight:600;border:none;border-radius:10px;background:#5A9E1A;color:#fff;text-decoration:none;">Analyze a lot</a>';}catch(e){}}
-  document.getElementById('signin-modal').addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
-  document.getElementById('signup-modal').addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
-});
-
-function openSignIn(){const s=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');if(s){window.location.href='/dashboard.html';return;}document.getElementById('signin-modal').style.display='flex';document.getElementById('si-error').style.display='none';document.getElementById('si-login').value='';document.getElementById('si-password').value='';}
-function openSignup(){const s=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');if(s){window.location.href='/dashboard.html';return;}document.getElementById('signup-modal').style.display='flex';document.getElementById('su-error').style.display='none';document.getElementById('su-success').style.display='none';}
-
-async function handleSignIn(){
-  const login=document.getElementById('si-login').value.trim();
-  const password=document.getElementById('si-password').value;
-  const remember=document.getElementById('si-remember').checked;
-  const btn=document.getElementById('si-btn');
-  const err=document.getElementById('si-error');
-  if(!login){err.textContent='Enter your email or username.';err.style.display='block';return;}
-  if(!password||password.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
-  btn.disabled=true;btn.textContent='Please wait...';err.style.display='none';
-  try{
-    let email=login;
-    if(!login.includes('@')){
-      const r=await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+login.toLowerCase()+'&select=email',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
-      const d=await r.json();
-      if(!d||!d.length){err.textContent='Username not found.';err.style.display='block';btn.disabled=false;btn.textContent='Sign in';return;}
-      email=d[0].email;
-    }
-    const res=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
-    const data=await res.json();
-    if(!res.ok)throw new Error(data.error_description||data.msg||'Wrong email or password');
-    const pRes=await fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+data.user.id+'&select=*',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.access_token}});
-    const pData=await pRes.json();
-    const profile=pData&&pData.length?pData[0]:{};
-    const user={...data.user,...profile};
-    if(remember){localStorage.setItem('ae_token',data.access_token);localStorage.setItem('ae_user',JSON.stringify(user));}
-    else{sessionStorage.setItem('ae_token',data.access_token);sessionStorage.setItem('ae_user',JSON.stringify(user));}
-    window.location.href='/dashboard.html';
-  }catch(e){err.textContent=e.message||'Something went wrong.';err.style.display='block';btn.disabled=false;btn.textContent='Sign in';}
-}
-
-async function handleSignUp(){
-  const firstName=document.getElementById('su-firstname').value.trim();
-  const lastName=document.getElementById('su-lastname').value.trim();
-  const username=document.getElementById('su-username').value.trim().toLowerCase();
-  const gender=document.getElementById('su-gender').value;
-  const email=document.getElementById('su-email').value.trim();
-  const password=document.getElementById('su-password').value;
-  const btn=document.getElementById('su-btn');
-  const err=document.getElementById('su-error');
-  const suc=document.getElementById('su-success');
-  if(!firstName){err.textContent='Enter your first name.';err.style.display='block';return;}
-  if(!lastName){err.textContent='Enter your last name.';err.style.display='block';return;}
-  if(!username||username.length<3){err.textContent='Username must be at least 3 characters.';err.style.display='block';return;}
-  if(!/^[a-z0-9_]+$/.test(username)){err.textContent='Username: letters, numbers and underscores only.';err.style.display='block';return;}
-  if(!gender){err.textContent='Please select your gender.';err.style.display='block';return;}
-  if(!email||!email.includes('@')){err.textContent='Enter a valid email.';err.style.display='block';return;}
-  if(!password||password.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
-  btn.disabled=true;btn.textContent='Please wait...';err.style.display='none';suc.style.display='none';
-  try{
-    const chk=await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+username+'&select=id',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
-    const chkD=await chk.json();
-    if(chkD&&chkD.length>0){err.textContent='Username already taken.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';return;}
-    const signupRes=await fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
-    const signupData=await signupRes.json();
-    if(!signupRes.ok)throw new Error(signupData.error_description||signupData.msg||'Signup failed');
-    const siRes=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
-    const siData=await siRes.json();
-    if(siRes.ok&&siData.access_token){
-      await fetch(SUPABASE_URL+'/rest/v1/profiles',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+siData.access_token,'Prefer':'return=minimal'},body:JSON.stringify({id:siData.user.id,first_name:firstName,last_name:lastName,username,gender,email})});
-      const user={...siData.user,first_name:firstName,last_name:lastName,username,gender};
-      localStorage.setItem('ae_token',siData.access_token);localStorage.setItem('ae_user',JSON.stringify(user));
-      window.location.href='/dashboard.html';
-    }else{suc.textContent='Account created! You can now sign in.';suc.style.display='block';btn.disabled=false;btn.textContent='Create account';}
-  }catch(e){err.textContent=e.message||'Something went wrong.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';}
-}
-</script>
-</script>
-</body>
-</html>
-
-<!-- SIGNIN MODAL -->
-<div id="signin-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;">
-  <div style="background:#0D160D;border:1px solid rgba(132,204,22,0.15);border-radius:20px;padding:2.25rem;width:100%;max-width:400px;position:relative;box-shadow:0 0 60px rgba(132,204,22,0.06);">
-    <button onclick="document.getElementById('signin-modal').style.display='none'" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:rgba(255,255,255,0.4);">&#215;</button>
-    <div style="width:40px;height:40px;background:rgba(132,204,22,0.1);border:1px solid rgba(132,204,22,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#84CC16" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" fill="#84CC16"/></svg></div>
-    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;color:#fff;">Welcome back</h2>
-    <p style="font-size:14px;color:rgba(255,255,255,0.35);margin-bottom:1.5rem;">Sign in to your AuctionEye account</p>
-    <div id="si-error" style="background:rgba(239,68,68,0.1);color:#EF4444;border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
-    <input id="si-login" type="text" placeholder="Email or username" style="width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.04);margin-bottom:10px;box-sizing:border-box;outline:none;"/>
-    <input id="si-password" type="password" placeholder="Password" style="width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.04);margin-bottom:10px;box-sizing:border-box;outline:none;"/>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"><input type="checkbox" id="si-remember" checked style="width:16px;height:16px;cursor:pointer;accent-color:#84CC16;"/><label for="si-remember" style="font-size:13px;color:rgba(255,255,255,0.35);cursor:pointer;">Remember me</label></div>
-    <button onclick="handleSignIn()" style="width:100%;padding:13px;background:#84CC16;color:#080E08;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;" id="si-btn">Sign in</button>
-    <p style="font-size:12px;color:rgba(255,255,255,0.3);text-align:center;margin-top:14px;">Don't have an account? <span onclick="openSignup()" style="color:#84CC16;cursor:pointer;font-weight:500;">Sign up free</span></p>
-  </div>
-</div>
-
-<!-- SIGNUP MODAL -->
-<div id="signup-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(16px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;">
-  <div style="background:#0D160D;border:1px solid rgba(132,204,22,0.15);border-radius:20px;padding:2.25rem;width:100%;max-width:400px;position:relative;margin:auto;box-shadow:0 0 60px rgba(132,204,22,0.06);">
-    <button onclick="document.getElementById('signup-modal').style.display='none'" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:rgba(255,255,255,0.4);">&#215;</button>
-    <div style="width:40px;height:40px;background:rgba(132,204,22,0.1);border:1px solid rgba(132,204,22,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="#84CC16" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" fill="#84CC16"/></svg></div>
-    <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px;color:#fff;">Create your account</h2>
-    <p style="font-size:14px;color:rgba(255,255,255,0.35);margin-bottom:1.5rem;">Start with 5 free analyses per month</p>
-    <div id="su-error" style="background:rgba(239,68,68,0.1);color:#EF4444;border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
-    <div id="su-success" style="background:rgba(132,204,22,0.1);color:#84CC16;border:1px solid rgba(132,204,22,0.2);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-      <input id="su-firstname" type="text" placeholder="First name" style="width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.04);box-sizing:border-box;outline:none;"/>
-      <input id="su-lastname" type="text" placeholder="Last name" style="width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.04);box-sizing:border-box;outline:none;"/>
-    </div>
-    <input id="su-username" type="text" placeholder="Username (e.g. carflip99)" style="width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.04);margin-bottom:10px;box-sizing:border-box;outline:none;"/>
-    <select id="su-gender" style="width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;color:rgba(255,255,255,0.5);background:#0D160D;margin-bottom:10px;box-sizing:border-box;appearance:none;outline:none;">
-      <option value="">Select gender</option><option value="male">Male (Mr.)</option><option value="female">Female (Ms.)</option><option value="nonbinary">Non-binary (Mx.)</option><option value="trans">Transgender (Mx.)</option><option value="other">Prefer not to say</option>
-    </select>
-    <input id="su-email" type="email" placeholder="Email address" style="width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.04);margin-bottom:10px;box-sizing:border-box;outline:none;"/>
-    <input id="su-password" type="password" placeholder="Password (min 6 characters)" style="width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.04);margin-bottom:16px;box-sizing:border-box;outline:none;"/>
-    <button onclick="handleSignUp()" style="width:100%;padding:13px;background:#84CC16;color:#080E08;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;" id="su-btn">Create account</button>
-    <p style="font-size:12px;color:rgba(255,255,255,0.3);text-align:center;margin-top:14px;">Already have an account? <span onclick="openSignIn()" style="color:#84CC16;cursor:pointer;font-weight:500;">Sign in</span></p>
-  </div>
-</div>
-
-<!-- THREE.JS NIGHT HIGHWAY -->
-<script>
-(function(){
-  // Ensure dark background always
-  const heroEl = document.querySelector('.hero');
-  if(heroEl) heroEl.style.background = '#080E08';
-  document.querySelector('.hero').style.background = '#080E08';
-  const canvas = document.getElementById('three-canvas');
-  if(!canvas || !window.THREE) return;
-  const W = canvas.offsetWidth || window.innerWidth;
-  const H = canvas.offsetHeight || window.innerHeight;
-
-  const renderer = new THREE.WebGLRenderer({canvas, alpha:false, antialias:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.setSize(W, H);
-  renderer.setClearColor(0x080E08,1);
-
-  const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x080E08, 0.013);
-
-  const camera = new THREE.PerspectiveCamera(58, W/H, 0.1, 300);
-  camera.position.set(0, 10, 16);
-  camera.lookAt(0, 0, -50);
-
-  // ── ROAD ──
-  const road = new THREE.Mesh(
-    new THREE.PlaneGeometry(24, 260),
-    new THREE.MeshBasicMaterial({color:0x06100A})
-  );
-  road.rotation.x = -Math.PI/2;
-  road.position.set(0,-0.05,-105);
-  scene.add(road);
-
-  // Edge lime strips
-  const edgeMat = new THREE.MeshBasicMaterial({color:0x84CC16,transparent:true,opacity:0.07});
-  [-11,11].forEach(x=>{
-    const e=new THREE.Mesh(new THREE.PlaneGeometry(0.35,260),edgeMat.clone());
-    e.rotation.x=-Math.PI/2; e.position.set(x,0.01,-105);
-    scene.add(e);
-  });
-
-  // Center white line
-  const cLine=new THREE.Mesh(
-    new THREE.PlaneGeometry(0.13,260),
-    new THREE.MeshBasicMaterial({color:0xFFFFFF,transparent:true,opacity:0.3})
-  );
-  cLine.rotation.x=-Math.PI/2; cLine.position.set(0,0.02,-105);
-  scene.add(cLine);
-
-  // Dashed lane markers
-  function dash(x,z,op){
-    const m=new THREE.Mesh(
-      new THREE.PlaneGeometry(0.09,3.5),
-      new THREE.MeshBasicMaterial({color:0xFFFFFF,transparent:true,opacity:op})
-    );
-    m.rotation.x=-Math.PI/2; m.position.set(x,0.02,z); scene.add(m);
-  }
-  for(let z=2;z>=-230;z-=9){
-    dash(-3.8,z,0.18); dash(3.8,z,0.18);
-    dash(-7.6,z,0.1);  dash(7.6,z,0.1);
-  }
-
-  // ── CAR LIGHTS ──
-  const TRAIL=55;
-
-  function makeCar(laneX, type){
-    const isTail = type==='tail';
-    const coreCol  = isTail ? 0xFF3311 : 0xFFEE66;
-    const glowCol  = isTail ? 0xFF1100 : 0xFFBB22;
-    const car={type,laneX,speed:0.17+Math.random()*0.28,spread:0.56,meshes:[],trailM:[],zHist:[]};
-    car.z = isTail ? (8+Math.random()*20) : (-185-Math.random()*45);
-
-    [-1,1].forEach(side=>{
-      const cx = laneX + side*car.spread;
-
-      const core=new THREE.Mesh(new THREE.SphereGeometry(0.1,8,8),new THREE.MeshBasicMaterial({color:coreCol}));
-      core.position.set(cx,0.34,car.z); scene.add(core); car.meshes.push({m:core,ox:cx});
-
-      const mid=new THREE.Mesh(new THREE.SphereGeometry(0.24,8,8),new THREE.MeshBasicMaterial({color:glowCol,transparent:true,opacity:0.42,depthWrite:false}));
-      mid.position.set(cx,0.34,car.z); scene.add(mid); car.meshes.push({m:mid,ox:cx});
-
-      const outer=new THREE.Mesh(new THREE.SphereGeometry(0.52,8,8),new THREE.MeshBasicMaterial({color:glowCol,transparent:true,opacity:0.11,depthWrite:false}));
-      outer.position.set(cx,0.34,car.z); scene.add(outer); car.meshes.push({m:outer,ox:cx});
-
-      for(let i=0;i<TRAIL;i++){
-        const f=1-i/TRAIL;
-        const t=new THREE.Mesh(
-          new THREE.SphereGeometry(0.07*f+0.01,4,4),
-          new THREE.MeshBasicMaterial({color:glowCol,transparent:true,opacity:f*0.22,depthWrite:false})
-        );
-        t.position.set(cx,0.34,car.z); scene.add(t);
-        car.trailM.push({m:t,step:i,ox:cx});
-      }
-    });
-    return car;
-  }
-
-  const cars=[];
-  const tailLanes=[-2,-5.5,-9], headLanes=[2,5.5,9];
-  tailLanes.forEach(lx=>{
-    for(let i=0;i<4;i++){
-      const c=makeCar(lx+(Math.random()-0.5)*0.35,'tail');
-      c.z=-i*38-Math.random()*12; c.zHist=[]; cars.push(c);
-    }
-  });
-  headLanes.forEach(lx=>{
-    for(let i=0;i<4;i++){
-      const c=makeCar(lx+(Math.random()-0.5)*0.35,'head');
-      c.z=-22-i*42-Math.random()*15; c.zHist=[]; cars.push(c);
-    }
-  });
-
-  function tickCar(car){
-    car.type==='tail' ? (car.z-=car.speed) : (car.z+=car.speed);
-    if(car.type==='tail' && car.z<-225){car.z=10+Math.random()*14;car.zHist=[];}
-    if(car.type==='head' && car.z>14){car.z=-185-Math.random()*35;car.zHist=[];}
-    car.zHist.unshift(car.z);
-    if(car.zHist.length>TRAIL) car.zHist.pop();
-    car.meshes.forEach(({m,ox})=>m.position.set(ox,0.34,car.z));
-    car.trailM.forEach(({m,step,ox})=>{
-      const hz=car.zHist[step]!==undefined?car.zHist[step]:car.z;
-      m.position.set(ox,0.34,hz);
-    });
-  }
-
-  // Stars
-  const sPos=new Float32Array(300*3);
-  for(let i=0;i<300;i++){sPos[i*3]=(Math.random()-0.5)*200;sPos[i*3+1]=9+Math.random()*55;sPos[i*3+2]=-Math.random()*260;}
-  const sGeo=new THREE.BufferGeometry(); sGeo.setAttribute('position',new THREE.BufferAttribute(sPos,3));
-  scene.add(new THREE.Points(sGeo,new THREE.PointsMaterial({color:0xFFFFFF,size:0.08,transparent:true,opacity:0.32})));
-
-  // Horizon glow
-  const hGlow=new THREE.Mesh(new THREE.PlaneGeometry(90,12),new THREE.MeshBasicMaterial({color:0x84CC16,transparent:true,opacity:0.055,depthWrite:false}));
-  hGlow.rotation.x=-Math.PI/2; hGlow.position.set(0,-0.08,-175); scene.add(hGlow);
-
-  // Ambient lime particles
-  const aPos=new Float32Array(90*3);
-  for(let i=0;i<90;i++){aPos[i*3]=(Math.random()-0.5)*32;aPos[i*3+1]=2+Math.random()*14;aPos[i*3+2]=-Math.random()*130;}
-  const aGeo=new THREE.BufferGeometry(); aGeo.setAttribute('position',new THREE.BufferAttribute(aPos,3));
-  const ambPts=new THREE.Points(aGeo,new THREE.PointsMaterial({color:0x84CC16,size:0.055,transparent:true,opacity:0.28}));
-  scene.add(ambPts);
-
-  window.addEventListener('resize',()=>{
-    const w=canvas.offsetWidth,h=canvas.offsetHeight;
-    renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();
-  });
-
-  let mx=0,my=0,tmx=0,tmy=0,t=0;
-  document.addEventListener('mousemove',e=>{
-    tmx=(e.clientX/window.innerWidth-0.5)*2.8;
-    tmy=(e.clientY/window.innerHeight-0.5)*1.3;
-  });
-
-  function animate(){
-    requestAnimationFrame(animate); t+=0.01;
-    cars.forEach(tickCar);
-    ambPts.position.y=Math.sin(t*0.35)*0.28;
-    mx+=(tmx-mx)*0.04; my+=(tmy-my)*0.04;
-    camera.position.x=mx*1.1;
-    camera.position.y=10+my*1.6;
-    camera.lookAt(mx*0.4,0,-50);
-    renderer.render(scene,camera);
-  }
-  animate();
-})();
-</script>
 
 <!-- AUTH + FAQ -->
 <script>
