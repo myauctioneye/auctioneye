@@ -460,6 +460,112 @@ window.addEventListener('scroll',()=>{
 
 // AUTH
 
+const SUPABASE_URL='https://gwwiuosdyrngtpbxuknq.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3d2l1b3NkeXJuZ3RwYnh1a25xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3ODAyODEsImV4cCI6MjA5MTM1NjI4MX0.1C9P21lICqB4_SzCM82YkyalvPF-FaO7t6LhYg1goFM';
+
+window.addEventListener('DOMContentLoaded',function(){
+  const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  if(stored){
+    try{
+      const nav=document.getElementById('nav-right');
+      if(nav)nav.innerHTML='<a href="/dashboard.html" style="padding:8px 18px;font-size:14px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:rgba(255,255,255,0.7);text-decoration:none;transition:all 0.2s;">Dashboard</a><a href="/app.html" style="padding:8px 18px;font-size:14px;font-weight:700;border:none;border-radius:10px;background:#84CC16;color:#080E08;text-decoration:none;cursor:pointer;">Analyze a lot</a>';
+    }catch(e){}
+  }
+  const sm=document.getElementById('signin-modal');
+  const sup=document.getElementById('signup-modal');
+  if(sm)sm.addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
+  if(sup)sup.addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
+});
+
+function openSignIn(){
+  const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  if(stored){window.location.href='/dashboard.html';return;}
+  const m=document.getElementById('signin-modal');
+  m.style.display='flex';
+  document.getElementById('si-error').style.display='none';
+  document.getElementById('si-login').value='';
+  document.getElementById('si-password').value='';
+}
+
+function openSignup(){
+  const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  if(stored){window.location.href='/dashboard.html';return;}
+  const m=document.getElementById('signup-modal');
+  m.style.display='flex';
+  document.getElementById('su-error').style.display='none';
+  document.getElementById('su-success').style.display='none';
+}
+
+async function handleSignIn(){
+  const login=document.getElementById('si-login').value.trim();
+  const password=document.getElementById('si-password').value;
+  const remember=document.getElementById('si-remember').checked;
+  const btn=document.getElementById('si-btn');
+  const err=document.getElementById('si-error');
+  if(!login){err.textContent='Enter your email or username.';err.style.display='block';return;}
+  if(!password||password.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Please wait...';err.style.display='none';
+  try{
+    let email=login;
+    if(!login.includes('@')){
+      const r=await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+login.toLowerCase()+'&select=email',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+      const d=await r.json();
+      if(!d||!d.length){err.textContent='Username not found.';err.style.display='block';btn.disabled=false;btn.textContent='Sign in';return;}
+      email=d[0].email;
+    }
+    const res=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error_description||data.msg||'Wrong email or password');
+    const pRes=await fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+data.user.id+'&select=*',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.access_token}});
+    const pData=await pRes.json();
+    const profile=pData&&pData.length?pData[0]:{};
+    const user={...data.user,...profile};
+    if(remember){localStorage.setItem('ae_token',data.access_token);localStorage.setItem('ae_user',JSON.stringify(user));}
+    else{sessionStorage.setItem('ae_token',data.access_token);sessionStorage.setItem('ae_user',JSON.stringify(user));}
+    window.location.href='/dashboard.html';
+  }catch(e){err.textContent=e.message||'Something went wrong.';err.style.display='block';btn.disabled=false;btn.textContent='Sign in';}
+}
+
+async function handleSignUp(){
+  const firstName=document.getElementById('su-firstname').value.trim();
+  const lastName=document.getElementById('su-lastname').value.trim();
+  const username=document.getElementById('su-username').value.trim().toLowerCase();
+  const gender=document.getElementById('su-gender').value;
+  const email=document.getElementById('su-email').value.trim();
+  const password=document.getElementById('su-password').value;
+  const btn=document.getElementById('su-btn');
+  const err=document.getElementById('su-error');
+  const suc=document.getElementById('su-success');
+  if(!firstName){err.textContent='Enter your first name.';err.style.display='block';return;}
+  if(!lastName){err.textContent='Enter your last name.';err.style.display='block';return;}
+  if(!username||username.length<3){err.textContent='Username must be at least 3 characters.';err.style.display='block';return;}
+  if(!/^[a-z0-9_]+$/.test(username)){err.textContent='Username: letters, numbers and underscores only.';err.style.display='block';return;}
+  if(!gender){err.textContent='Please select your gender.';err.style.display='block';return;}
+  if(!email||!email.includes('@')){err.textContent='Enter a valid email.';err.style.display='block';return;}
+  if(!password||password.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Please wait...';err.style.display='none';suc.style.display='none';
+  try{
+    const chk=await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+username+'&select=id',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    const chkD=await chk.json();
+    if(chkD&&chkD.length>0){err.textContent='Username already taken.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';return;}
+    const signupRes=await fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
+    const signupData=await signupRes.json();
+    if(!signupRes.ok)throw new Error(signupData.error_description||signupData.msg||'Signup failed');
+    const siRes=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
+    const siData=await siRes.json();
+    if(siRes.ok&&siData.access_token){
+      await fetch(SUPABASE_URL+'/rest/v1/profiles',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+siData.access_token,'Prefer':'return=minimal'},body:JSON.stringify({id:siData.user.id,first_name:firstName,last_name:lastName,username,gender,email})});
+      const user={...siData.user,first_name:firstName,last_name:lastName,username,gender};
+      localStorage.setItem('ae_token',siData.access_token);
+      localStorage.setItem('ae_user',JSON.stringify(user));
+      window.location.href='/dashboard.html';
+    }else{
+      suc.textContent='Account created! You can now sign in.';suc.style.display='block';
+      btn.disabled=false;btn.textContent='Create account';
+    }
+  }catch(e){err.textContent=e.message||'Something went wrong.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';}
+}
+
 </script>
 </body>
 </html>
