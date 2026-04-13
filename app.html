@@ -188,7 +188,7 @@ nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-co
   <div class="card">
     <div class="card-label">Enter the lot VIN</div>
     <div class="vin-wrap">
-      <input id="vin" class="vin-input" type="text" placeholder="e.g. 3FA6P0HD6HR238708" maxlength="17" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"/>
+      <input id="vin" class="vin-input" type="text" placeholder="e.g. 3FA6P0HD6HR238708" maxlength="17" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')lookupVIN()"/>
       <button id="lookup-btn" class="analyze-btn" onclick="lookupVIN()">Analyze</button>
     </div>
     <div class="steps hidden" id="steps">
@@ -354,10 +354,13 @@ let currentUser=null, userPlan='free', analysesUsed=0, vData={}, viewingReport=f
 window.addEventListener('DOMContentLoaded',async function(){
   const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
   const token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token');
-  if(stored&&token){
-    try{currentUser=JSON.parse(stored);await loadUserData();}
-    catch(e){currentUser=null;}
+  if(!stored||!token){
+    // Not logged in — redirect to landing with signup open
+    window.location.href='/index.html';
+    return;
   }
+  try{currentUser=JSON.parse(stored);await loadUserData();}
+  catch(e){localStorage.clear();sessionStorage.clear();window.location.href='/index.html';return;}
   renderNav();
   // Reopen VIN if coming from dashboard
   const reopen=localStorage.getItem('ae_reopen_vin');
@@ -379,6 +382,7 @@ async function loadUserData(){
 function renderNav(){
   const nav=document.getElementById('nav-right');
   const usageWrap=document.getElementById('usage-wrap');
+  if(!nav)return;
   if(currentUser){
     const title=currentUser.gender==='male'?'Mr.':currentUser.gender==='female'?'Ms.':(currentUser.gender==='nonbinary'||currentUser.gender==='trans')?'Mx.':'';
     const name=(currentUser.first_name&&currentUser.last_name)?(title?title+' ':'')+currentUser.first_name+' '+currentUser.last_name:currentUser.email.split('@')[0];
