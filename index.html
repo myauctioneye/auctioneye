@@ -29,12 +29,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .btn-cta:hover{background:#A3E635;}
 
 /* HERO */
-.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:#080E08;}
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:#080E08;padding-top:80px;}
 #three-canvas{display:none;}
 .hero-overlay-radial{position:absolute;inset:0;background:radial-gradient(ellipse 80% 55% at 50% 48%,rgba(8,14,8,0) 15%,rgba(8,14,8,0.62) 65%,rgba(8,14,8,0.97) 100%);z-index:1;pointer-events:none;}
 .hero-overlay-bottom{position:absolute;bottom:0;left:0;right:0;height:42%;background:linear-gradient(to top,#080E08 0%,transparent 100%);z-index:1;pointer-events:none;}
 .hero-beam{display:none;}
 .hero-content{position:relative;z-index:2;text-align:center;max-width:760px;padding:9rem 2rem 1.5rem;}
+.hero-content{position:relative;z-index:2;text-align:center;padding:0 2rem;margin-bottom:1rem;}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;padding:6px 16px;border-radius:999px;background:rgba(132,204,22,0.08);border:1px solid rgba(132,204,22,0.22);color:#84CC16;margin-bottom:2rem;letter-spacing:0.09em;text-transform:uppercase;animation:fadeUp 0.6s ease-out 0.3s both;}
 .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:#84CC16;animation:badgePulse 2.2s ease-in-out infinite;}
 @keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(132,204,22,0.6);}60%{box-shadow:0 0 0 7px rgba(132,204,22,0);}}
@@ -173,6 +174,10 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 .t-trap{color:#EF4444;font-weight:700;font-family:'Syne',sans-serif;}
 .t-neutral{color:#F59E0B;font-weight:700;font-family:'Syne',sans-serif;}
 @keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-d1{transition-delay:0.1s;}.reveal-d2{transition-delay:0.2s;}.reveal-d3{transition-delay:0.3s;}
 </style>
 </head>
 <body>
@@ -246,11 +251,11 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 
 <!-- HOW IT WORKS -->
 <div class="section" id="how">
-  <div class="section-tag">How it works</div>
+  <div class="section-tag reveal">How it works</div>
   <h2>From VIN to verdict in 3 steps</h2>
   <p class="sub">No guessing. No spreadsheets. Just paste a VIN and know exactly what you're dealing with.</p>
   <div class="steps-grid">
-    <div class="step-card"><div class="step-num">1</div><div class="step-title">Paste the VIN</div><div class="step-desc">Copy the VIN from any Copart, IAAI, or Manheim listing. Takes 5 seconds.</div></div>
+    <div class="step-card reveal"><div class="step-num">1</div><div class="step-title">Paste the VIN</div><div class="step-desc">Copy the VIN from any Copart, IAAI, or Manheim listing. Takes 5 seconds.</div></div>
     <div class="step-card"><div class="step-num">2</div><div class="step-title">Enter your bid & repair</div><div class="step-desc">Tell us your max bid and repair estimate. We calculate all auction fees automatically.</div></div>
     <div class="step-card"><div class="step-num">3</div><div class="step-title">Get the verdict</div><div class="step-desc">Deal, Neutral, or Trap — with exact margin, ROI, and every risk flag. Know before you bid.</div></div>
   </div>
@@ -259,11 +264,11 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 <!-- FEATURES -->
 <div class="features-section" id="features">
   <div class="features-inner">
-    <div class="section-tag">Features</div>
+    <div class="section-tag reveal">Features</div>
     <h2>Everything you need to bid smart</h2>
     <p class="sub" style="color:rgba(255,255,255,0.4);font-size:16px;max-width:480px;line-height:1.7;margin-top:0.5rem;">Built for buyers who flip. Not for casual car shoppers.</p>
     <div class="features-grid">
-      <div class="feature-card"><div class="feature-icon fi-lime"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="#84CC16" stroke-width="1.5"/><line x1="7" y1="10" x2="13" y2="10" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="7" x2="10" y2="13" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="feature-title">VIN lookup — NHTSA official</div><div class="feature-desc">Real specs from the US government database. Same source every commercial VIN service uses.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-lime"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="#84CC16" stroke-width="1.5"/><line x1="7" y1="10" x2="13" y2="10" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="7" x2="10" y2="13" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="feature-title">VIN lookup — NHTSA official</div><div class="feature-desc">Real specs from the US government database. Same source every commercial VIN service uses.</div></div>
       <div class="feature-card"><div class="feature-icon fi-green"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 14 L6 10 L9 12 L12 6 L15 9 L17 7" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="feature-title">Real profit margin</div><div class="feature-desc">Bid + auction fees (~12%) + repair + transport. See exactly what you make before you bid.</div></div>
       <div class="feature-card"><div class="feature-icon fi-red"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#EF4444" stroke-width="1.5"/><line x1="10" y1="7" x2="10" y2="11" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="13.5" r="0.75" fill="#EF4444"/></svg></div><div class="feature-title">Risk flags</div><div class="feature-desc">Flood, fire, rollover, salvage — automatically flagged. Know the risk before you commit a dollar.</div></div>
       <div class="feature-card"><div class="feature-icon fi-lime"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10.5 L8 13.5 L15 6.5" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="feature-title">Deal / Neutral / Trap verdict</div><div class="feature-desc">One clear answer every time. No maybes, no guessing. Bid with confidence or walk away fast.</div></div>
@@ -277,7 +282,7 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 <div class="pricing-section" id="pricing">
   <div class="pricing-inner">
     <div style="text-align:center;">
-      <div class="section-tag">Pricing</div>
+      <div class="section-tag reveal">Pricing</div>
       <h2>Simple, transparent pricing</h2>
       <p style="font-size:16px;color:rgba(255,255,255,0.4);margin-top:0.75rem;">Start free. Upgrade when you need more.</p>
     </div>
@@ -340,12 +345,12 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 <div class="testimonials">
   <div class="testimonials-inner">
     <div style="text-align:center;">
-      <div class="section-tag">Reviews</div>
+      <div class="section-tag reveal">Reviews</div>
       <h2>Trusted by auction buyers</h2>
       <p style="font-size:16px;color:rgba(255,255,255,0.4);margin-top:0.75rem;">Real feedback from people who flip for a living.</p>
     </div>
     <div class="testimonials-grid">
-      <div class="testimonial"><div class="stars">★★★★★</div><div class="testimonial-text">"I used to spend 20 minutes on each Copart lot. Now I know in 30 seconds if it's worth bidding. Paid for itself on the first deal."</div><div class="testimonial-author"><div class="author-avatar">MR</div><div><div class="author-name">Miguel R.</div><div class="author-title">Auto flipper · Miami, FL</div></div></div></div>
+      <div class="testimonial reveal"><div class="stars">★★★★★</div><div class="testimonial-text">"I used to spend 20 minutes on each Copart lot. Now I know in 30 seconds if it's worth bidding. Paid for itself on the first deal."</div><div class="testimonial-author"><div class="author-avatar">MR</div><div><div class="author-name">Miguel R.</div><div class="author-title">Auto flipper · Miami, FL</div></div></div></div>
       <div class="testimonial"><div class="stars">★★★★★</div><div class="testimonial-text">"The risk flags saved me from a flood car that looked clean in the IAAI photos. That alone is worth way more than $59/month."</div><div class="testimonial-author"><div class="author-avatar">JT</div><div><div class="author-name">James T.</div><div class="author-title">Copart buyer · Orlando, FL</div></div></div></div>
       <div class="testimonial"><div class="stars">★★★★★</div><div class="testimonial-text">"Finally a tool built for people who actually buy at auction. The margin calculator is exactly what I needed."</div><div class="testimonial-author"><div class="author-avatar">CR</div><div><div class="author-name">Carlos R.</div><div class="author-title">Dealer · Tampa, FL</div></div></div></div>
     </div>
@@ -355,7 +360,7 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 <!-- FAQ -->
 <div class="faq-section" id="faq">
   <div class="faq-inner">
-    <div style="text-align:center;margin-bottom:3rem;"><div class="section-tag">FAQ</div><h2>Common questions</h2></div>
+    <div style="text-align:center;margin-bottom:3rem;"><div class="section-tag reveal">FAQ</div><h2>Common questions</h2></div>
     <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Where does the vehicle data come from? <span class="faq-icon">+</span></div><div class="faq-a">Vehicle specs come from the NHTSA vPIC database — the official US government source. Title history comes from NMVTIS, the national motor vehicle title database.</div></div>
     <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Does it work with Copart and IAAI? <span class="faq-icon">+</span></div><div class="faq-a">Yes. Just grab the VIN from the lot listing. AuctionEye works with any US vehicle VIN regardless of which auction platform you use.</div></div>
     <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Can I cancel anytime? <span class="faq-icon">+</span></div><div class="faq-a">Yes — cancel anytime with no fees. Your plan stays active until the end of the billing period.</div></div>
