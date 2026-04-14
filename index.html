@@ -178,6 +178,29 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 .reveal{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease;}
 .reveal.visible{opacity:1;transform:translateY(0);}
 .reveal-d1{transition-delay:0.1s;}.reveal-d2{transition-delay:0.2s;}.reveal-d3{transition-delay:0.3s;}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-d1{transition-delay:0.1s;}.reveal-d2{transition-delay:0.2s;}.reveal-d3{transition-delay:0.3s;}.reveal-d4{transition-delay:0.4s;}
+
+/* FADE UP for hero */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.hero-badge{animation:fadeUp 0.6s ease 0.2s both;}
+.hero h1{animation:fadeUp 0.7s ease 0.3s both;}
+.hero-sub{animation:fadeUp 0.7s ease 0.4s both;}
+.hero-btns{animation:fadeUp 0.7s ease 0.5s both;}
+.hero-note{animation:fadeUp 0.7s ease 0.6s both;}
+.mascot-wrap{animation:fadeUp 0.9s ease 0.7s both;}
+
+/* ROAD LINES */
+.road-lines{position:absolute;inset:0;pointer-events:none;z-index:0;display:flex;justify-content:center;}
+.road-line{width:2px;background:linear-gradient(to bottom,transparent,rgba(132,204,22,0.3),transparent);animation:roadLine 2.5s linear infinite;position:absolute;}
+@keyframes roadLine{0%{height:0;top:0;opacity:0;}20%{opacity:1;}100%{height:40%;top:100%;opacity:0;}}
+
+#signin-modal[style*="display:flex"], #signup-modal[style*="display:flex"] {
+  display:flex !important;
+}
 </style>
 </head>
 <body>
@@ -202,12 +225,11 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 <!-- HERO — Three.js 3D night highway -->
 <div class="hero">
   <!-- Subtle dark particles -->
-  <div class="car-lights">
-    <div class="car-light" style="width:3px;height:3px;background:#FF3300;left:44%;top:0;animation-duration:3.2s;animation-delay:0s;box-shadow:0 0 8px #FF3300;"></div>
-    <div class="car-light" style="width:3px;height:3px;background:#FF3300;left:56%;top:0;animation-duration:2.8s;animation-delay:1.1s;box-shadow:0 0 8px #FF3300;"></div>
-    <div class="car-light" style="width:4px;height:4px;background:#FFD700;left:41%;top:0;animation-duration:3.5s;animation-delay:0.6s;box-shadow:0 0 10px #FFD700;"></div>
-    <div class="car-light" style="width:4px;height:4px;background:#FFD700;left:59%;top:0;animation-duration:4.1s;animation-delay:1.8s;box-shadow:0 0 10px #FFD700;"></div>
-    <div class="car-light" style="width:2px;height:2px;background:#FFCC44;left:53%;top:0;animation-duration:3.8s;animation-delay:0.9s;box-shadow:0 0 6px #FFCC44;"></div>
+  <div class="road-lines">
+    <div class="road-line" style="animation-delay:0s;animation-duration:2.5s;left:calc(50% - 1px);"></div>
+    <div class="road-line" style="animation-delay:0.8s;animation-duration:2.5s;left:calc(50% + 60px);opacity:0.5;"></div>
+    <div class="road-line" style="animation-delay:1.6s;animation-duration:2.5s;left:calc(50% - 60px);opacity:0.5;"></div>
+  </div>
   </div>
 
   <div class="hero-content">
@@ -221,7 +243,7 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
     <p class="hero-note">5 free analyses every month. No credit card required.</p>
   </div>
 
-  <div class="mascot-wrap">
+  <div class="mascot-wrap" style="margin-top:3rem;">
     <img src="/owl_nobg.png" alt="AuctionEye mascot"/>
   </div>
 </div>
@@ -242,10 +264,10 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 
 <!-- STATS -->
 <div class="stats-section">
-  <div class="stats-inner">
-    <div><div class="stat-val">10s</div><div class="stat-lbl">Analysis time</div></div>
-    <div><div class="stat-val">100%</div><div class="stat-lbl">NHTSA official data</div></div>
-    <div><div class="stat-val">$0</div><div class="stat-lbl">To get started</div></div>
+  <div class="stats-inner reveal">
+    <div><div class="stat-val" data-target="10" data-suffix="s">10s</div><div class="stat-lbl">Analysis time</div></div>
+    <div><div class="stat-val" data-target="100" data-suffix="%">100%</div><div class="stat-lbl">NHTSA official data</div></div>
+    <div><div class="stat-val" data-target="0" data-prefix="$">$0</div><div class="stat-lbl">To get started</div></div>
   </div>
 </div>
 
@@ -256,8 +278,8 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
   <p class="sub">No guessing. No spreadsheets. Just paste a VIN and know exactly what you're dealing with.</p>
   <div class="steps-grid">
     <div class="step-card reveal"><div class="step-num">1</div><div class="step-title">Paste the VIN</div><div class="step-desc">Copy the VIN from any Copart, IAAI, or Manheim listing. Takes 5 seconds.</div></div>
-    <div class="step-card"><div class="step-num">2</div><div class="step-title">Enter your bid & repair</div><div class="step-desc">Tell us your max bid and repair estimate. We calculate all auction fees automatically.</div></div>
-    <div class="step-card"><div class="step-num">3</div><div class="step-title">Get the verdict</div><div class="step-desc">Deal, Neutral, or Trap — with exact margin, ROI, and every risk flag. Know before you bid.</div></div>
+    <div class="step-card reveal"><div class="step-num">2</div><div class="step-title">Enter your bid & repair</div><div class="step-desc">Tell us your max bid and repair estimate. We calculate all auction fees automatically.</div></div>
+    <div class="step-card reveal"><div class="step-num">3</div><div class="step-title">Get the verdict</div><div class="step-desc">Deal, Neutral, or Trap — with exact margin, ROI, and every risk flag. Know before you bid.</div></div>
   </div>
 </div>
 
@@ -269,11 +291,11 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
     <p class="sub" style="color:rgba(255,255,255,0.4);font-size:16px;max-width:480px;line-height:1.7;margin-top:0.5rem;">Built for buyers who flip. Not for casual car shoppers.</p>
     <div class="features-grid">
       <div class="feature-card reveal"><div class="feature-icon fi-lime"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="#84CC16" stroke-width="1.5"/><line x1="7" y1="10" x2="13" y2="10" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="7" x2="10" y2="13" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="feature-title">VIN lookup — NHTSA official</div><div class="feature-desc">Real specs from the US government database. Same source every commercial VIN service uses.</div></div>
-      <div class="feature-card"><div class="feature-icon fi-green"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 14 L6 10 L9 12 L12 6 L15 9 L17 7" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="feature-title">Real profit margin</div><div class="feature-desc">Bid + auction fees (~12%) + repair + transport. See exactly what you make before you bid.</div></div>
-      <div class="feature-card"><div class="feature-icon fi-red"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#EF4444" stroke-width="1.5"/><line x1="10" y1="7" x2="10" y2="11" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="13.5" r="0.75" fill="#EF4444"/></svg></div><div class="feature-title">Risk flags</div><div class="feature-desc">Flood, fire, rollover, salvage — automatically flagged. Know the risk before you commit a dollar.</div></div>
-      <div class="feature-card"><div class="feature-icon fi-lime"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10.5 L8 13.5 L15 6.5" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="feature-title">Deal / Neutral / Trap verdict</div><div class="feature-desc">One clear answer every time. No maybes, no guessing. Bid with confidence or walk away fast.</div></div>
-      <div class="feature-card"><div class="feature-icon fi-amber"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#F59E0B" stroke-width="1.5"/><line x1="10" y1="6" x2="10" y2="10" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="10" x2="13" y2="13" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="feature-title">Title history — Pro & Dealer</div><div class="feature-desc">Full NMVTIS report. Salvage history, odometer records, every title brand ever issued.</div></div>
-      <div class="feature-card"><div class="feature-icon fi-green"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3 L12.5 8 L18 8.5 L14 12.5 L15 18 L10 15 L5 18 L6 12.5 L2 8.5 L7.5 8 Z" stroke="#22C55E" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div class="feature-title">Local market prices — Basic+</div><div class="feature-desc">Real listings from Craigslist and Facebook Marketplace near you. Not national averages.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-green"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 14 L6 10 L9 12 L12 6 L15 9 L17 7" stroke="#22C55E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="feature-title">Real profit margin</div><div class="feature-desc">Bid + auction fees (~12%) + repair + transport. See exactly what you make before you bid.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-red"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#EF4444" stroke-width="1.5"/><line x1="10" y1="7" x2="10" y2="11" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="13.5" r="0.75" fill="#EF4444"/></svg></div><div class="feature-title">Risk flags</div><div class="feature-desc">Flood, fire, rollover, salvage — automatically flagged. Know the risk before you commit a dollar.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-lime"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10.5 L8 13.5 L15 6.5" stroke="#84CC16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="feature-title">Deal / Neutral / Trap verdict</div><div class="feature-desc">One clear answer every time. No maybes, no guessing. Bid with confidence or walk away fast.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-amber"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#F59E0B" stroke-width="1.5"/><line x1="10" y1="6" x2="10" y2="10" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/><line x1="10" y1="10" x2="13" y2="13" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/></svg></div><div class="feature-title">Title history — Pro & Dealer</div><div class="feature-desc">Full NMVTIS report. Salvage history, odometer records, every title brand ever issued.</div></div>
+      <div class="feature-card reveal"><div class="feature-icon fi-green"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3 L12.5 8 L18 8.5 L14 12.5 L15 18 L10 15 L5 18 L6 12.5 L2 8.5 L7.5 8 Z" stroke="#22C55E" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div class="feature-title">Local market prices — Basic+</div><div class="feature-desc">Real listings from Craigslist and Facebook Marketplace near you. Not national averages.</div></div>
     </div>
   </div>
 </div>
@@ -287,7 +309,7 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
       <p style="font-size:16px;color:rgba(255,255,255,0.4);margin-top:0.75rem;">Start free. Upgrade when you need more.</p>
     </div>
     <div class="pricing-grid">
-      <div class="plan-card">
+      <div class="plan-card reveal">
         <div class="plan-name">Free</div><div class="plan-price">$0<span>/mo</span></div>
         <div class="plan-desc">Casual buyers checking the occasional lot.</div>
         <hr class="plan-divider"/>
@@ -299,7 +321,7 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
         </ul>
         <button class="plan-btn plan-btn-outline" onclick="openSignup()">Get started free</button>
       </div>
-      <div class="plan-card">
+      <div class="plan-card reveal">
         <div class="plan-name">Basic</div><div class="plan-price">$29<span>/mo</span></div>
         <div class="plan-desc">Flippers buying a few cars a month.</div>
         <hr class="plan-divider"/>
@@ -311,7 +333,7 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
         </ul>
         <button class="plan-btn plan-btn-outline" onclick="goToStripe('https://buy.stripe.com/test_9B6eVc7m1ddkac005Aasg03')">Start Basic</button>
       </div>
-      <div class="plan-card featured">
+      <div class="plan-card featured reveal">
         <div class="popular-tag">Most popular</div>
         <div class="plan-name">Pro</div><div class="plan-price">$59<span>/mo</span></div>
         <div class="plan-desc">Serious flippers who need the full picture.</div>
@@ -325,7 +347,7 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
         </ul>
         <button class="plan-btn plan-btn-filled" onclick="goToStripe('https://buy.stripe.com/test_6oUfZg5dT0qygAo4lQasg04')">Start Pro</button>
       </div>
-      <div class="plan-card">
+      <div class="plan-card reveal">
         <div class="plan-name">Dealer</div><div class="plan-price">$149<span>/mo</span></div>
         <div class="plan-desc">High-volume dealers across multiple auctions.</div>
         <hr class="plan-divider"/>
@@ -351,8 +373,8 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
     </div>
     <div class="testimonials-grid">
       <div class="testimonial reveal"><div class="stars">★★★★★</div><div class="testimonial-text">"I used to spend 20 minutes on each Copart lot. Now I know in 30 seconds if it's worth bidding. Paid for itself on the first deal."</div><div class="testimonial-author"><div class="author-avatar">MR</div><div><div class="author-name">Miguel R.</div><div class="author-title">Auto flipper · Miami, FL</div></div></div></div>
-      <div class="testimonial"><div class="stars">★★★★★</div><div class="testimonial-text">"The risk flags saved me from a flood car that looked clean in the IAAI photos. That alone is worth way more than $59/month."</div><div class="testimonial-author"><div class="author-avatar">JT</div><div><div class="author-name">James T.</div><div class="author-title">Copart buyer · Orlando, FL</div></div></div></div>
-      <div class="testimonial"><div class="stars">★★★★★</div><div class="testimonial-text">"Finally a tool built for people who actually buy at auction. The margin calculator is exactly what I needed."</div><div class="testimonial-author"><div class="author-avatar">CR</div><div><div class="author-name">Carlos R.</div><div class="author-title">Dealer · Tampa, FL</div></div></div></div>
+      <div class="testimonial reveal"><div class="stars">★★★★★</div><div class="testimonial-text">"The risk flags saved me from a flood car that looked clean in the IAAI photos. That alone is worth way more than $59/month."</div><div class="testimonial-author"><div class="author-avatar">JT</div><div><div class="author-name">James T.</div><div class="author-title">Copart buyer · Orlando, FL</div></div></div></div>
+      <div class="testimonial reveal"><div class="stars">★★★★★</div><div class="testimonial-text">"Finally a tool built for people who actually buy at auction. The margin calculator is exactly what I needed."</div><div class="testimonial-author"><div class="author-avatar">CR</div><div><div class="author-name">Carlos R.</div><div class="author-title">Dealer · Tampa, FL</div></div></div></div>
     </div>
   </div>
 </div>
@@ -361,11 +383,11 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 <div class="faq-section" id="faq">
   <div class="faq-inner">
     <div style="text-align:center;margin-bottom:3rem;"><div class="section-tag reveal">FAQ</div><h2>Common questions</h2></div>
-    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Where does the vehicle data come from? <span class="faq-icon">+</span></div><div class="faq-a">Vehicle specs come from the NHTSA vPIC database — the official US government source. Title history comes from NMVTIS, the national motor vehicle title database.</div></div>
-    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Does it work with Copart and IAAI? <span class="faq-icon">+</span></div><div class="faq-a">Yes. Just grab the VIN from the lot listing. AuctionEye works with any US vehicle VIN regardless of which auction platform you use.</div></div>
-    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Can I cancel anytime? <span class="faq-icon">+</span></div><div class="faq-a">Yes — cancel anytime with no fees. Your plan stays active until the end of the billing period.</div></div>
-    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What's included in the free plan? <span class="faq-icon">+</span></div><div class="faq-a">5 analyses per month with full VIN lookup, profit margin calculation, risk flags, and the Deal/Neutral/Trap verdict. No credit card required.</div></div>
-    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How accurate is the market value estimate? <span class="faq-icon">+</span></div><div class="faq-a">Free plan uses make/model/year estimates. Pro and Dealer plans pull real local listings from Craigslist and Facebook Marketplace near you.</div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Where does the vehicle data come from? <span class="faq-icon">+</span></div><div class="faq-a">Vehicle specs come from the NHTSA vPIC database — the official US government source. Title history comes from NMVTIS, the national motor vehicle title database.</div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Does it work with Copart and IAAI? <span class="faq-icon">+</span></div><div class="faq-a">Yes. Just grab the VIN from the lot listing. AuctionEye works with any US vehicle VIN regardless of which auction platform you use.</div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Can I cancel anytime? <span class="faq-icon">+</span></div><div class="faq-a">Yes — cancel anytime with no fees. Your plan stays active until the end of the billing period.</div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">What's included in the free plan? <span class="faq-icon">+</span></div><div class="faq-a">5 analyses per month with full VIN lookup, profit margin calculation, risk flags, and the Deal/Neutral/Trap verdict. No credit card required.</div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">How accurate is the market value estimate? <span class="faq-icon">+</span></div><div class="faq-a">Free plan uses make/model/year estimates. Pro and Dealer plans pull real local listings from Craigslist and Facebook Marketplace near you.</div></div>
   </div>
 </div>
 
@@ -420,6 +442,32 @@ footer{padding:2rem;border-top:1px solid rgba(255,255,255,0.04);}
 <!-- AUTH + FAQ -->
 <script>
 function toggleFaq(el){el.classList.toggle('active');el.nextElementSibling.classList.toggle('open');}
+
+// SCROLL REVEAL
+const revealObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');revealObs.unobserve(e.target);}});
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
+
+// COUNT UP
+function countUp(el){
+  const target=parseInt(el.dataset.target);
+  const prefix=el.dataset.prefix||'';
+  const suffix=el.dataset.suffix||'';
+  const dur=1500,start=performance.now();
+  function step(now){const p=Math.min((now-start)/dur,1);const e=1-Math.pow(1-p,3);el.textContent=prefix+Math.round(e*target)+suffix;if(p<1)requestAnimationFrame(step);}
+  requestAnimationFrame(step);
+}
+const countObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting&&!e.target.dataset.counted){e.target.dataset.counted=true;countUp(e.target);}});
+},{threshold:0.5});
+document.querySelectorAll('[data-target]').forEach(el=>countObs.observe(el));
+
+// NAV SCROLL
+window.addEventListener('scroll',()=>{
+  const nav=document.getElementById('main-nav')||document.querySelector('nav');
+  if(nav){nav.style.background=window.scrollY>50?'rgba(8,14,8,0.98)':'rgba(8,14,8,0.92)';}
+});
 const SUPABASE_URL='https://gwwiuosdyrngtpbxuknq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3d2l1b3NkeXJuZ3RwYnh1a25xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3ODAyODEsImV4cCI6MjA5MTM1NjI4MX0.1C9P21lICqB4_SzCM82YkyalvPF-FaO7t6LhYg1goFM';
 
@@ -430,8 +478,24 @@ window.addEventListener('DOMContentLoaded',function(){
   document.getElementById('signup-modal').addEventListener('click',function(e){if(e.target===this)this.style.display='none';});
 });
 
-function openSignIn(){const s=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');if(s){window.location.href='/dashboard.html';return;}document.getElementById('signin-modal').style.display='flex';document.getElementById('si-error').style.display='none';document.getElementById('si-login').value='';document.getElementById('si-password').value='';}
-function openSignup(){const s=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');if(s){window.location.href='/dashboard.html';return;}document.getElementById('signup-modal').style.display='flex';document.getElementById('su-error').style.display='none';document.getElementById('su-success').style.display='none';}
+function openSignIn(){
+  const s=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  if(s){window.location.href='/dashboard.html';return;}
+  const m=document.getElementById('signin-modal');
+  m.style.cssText=m.style.cssText.replace('display:none','display:flex');
+  m.style.display='flex';
+  document.getElementById('si-error').style.display='none';
+  document.getElementById('si-login').value='';
+  document.getElementById('si-password').value='';
+}
+function openSignup(){
+  const s=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  if(s){window.location.href='/dashboard.html';return;}
+  const m=document.getElementById('signup-modal');
+  m.style.display='flex';
+  document.getElementById('su-error').style.display='none';
+  document.getElementById('su-success').style.display='none';
+}
 
 async function handleSignIn(){
   const login=document.getElementById('si-login').value.trim();
