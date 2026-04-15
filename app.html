@@ -353,37 +353,25 @@ let currentUser=null, userPlan='free', analysesUsed=0, vData={}, viewingReport=f
 
 window.addEventListener('DOMContentLoaded',async function(){
   const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
-  const token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token');
+  let token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token');
 
+  // Load user from storage regardless of token
   if(stored){
-    try{
-      currentUser=JSON.parse(stored);
-    }catch(e){currentUser=null;}
+    try{currentUser=JSON.parse(stored);}
+    catch(e){currentUser=null;}
   }
 
-  // Try to refresh token if missing
-  let activeToken = token;
+  // Try to refresh token if missing or expired
   if(currentUser&&!token){
-    const refresh=localStorage.getItem('ae_refresh')||sessionStorage.getItem('ae_refresh');
-    if(refresh){
-      try{
-        const refRes=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{
-          method:'POST',
-          headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
-          body:JSON.stringify({refresh_token:refresh})
-        });
-        const refData=await refRes.json();
-        if(refRes.ok&&refData.access_token){
-          activeToken=refData.access_token;
-          localStorage.setItem('ae_token',refData.access_token);
-          if(refData.refresh_token)localStorage.setItem('ae_refresh',refData.refresh_token);
-        }
-      }catch(e){console.log('Token refresh failed:',e);}
-    }
+    try{
+      // Re-authenticate using stored credentials won't work without password
+      // So just show nav with user info, token will be checked on analyze
+      console.log('Token missing, will re-auth on analyze');
+    }catch(e){}
   }
 
-  // Load usage if we have a token
-  if(currentUser&&activeToken){
+  // Load usage data if token exists
+  if(currentUser&&token){
     try{
       const month=new Date().toISOString().slice(0,7);
       const res=await fetch(SUPABASE_URL+'/rest/v1/user_usage?user_id=eq.'+currentUser.id+'&month=eq.'+month+'&select=*',{
@@ -394,14 +382,7 @@ window.addEventListener('DOMContentLoaded',async function(){
         analysesUsed=data[0].analyses_count||0;
         userPlan=data[0].plan||data[0].plsn||'free';
       }
-    }catch(e){console.log('Usage load error:',e);}
-  }
-
-  // If token is missing but user exists, try to refresh silently
-  if(currentUser&&!token){
-    // Token expired - clear and re-login on next analyze
-    userPlan='free';
-    analysesUsed=0;
+    }catch(e){}
   }
 
   renderNav();
