@@ -354,10 +354,37 @@ let currentUser=null, userPlan='free', analysesUsed=0, vData={}, viewingReport=f
 window.addEventListener('DOMContentLoaded',async function(){
   const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
   const token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token');
-  if(stored&&token){
+
+  if(stored){
     try{
       currentUser=JSON.parse(stored);
-      // Load plan data
+    }catch(e){currentUser=null;}
+  }
+
+  // Try to refresh token if missing
+  let activeToken = token;
+  if(currentUser&&!token){
+    const refresh=localStorage.getItem('ae_refresh')||sessionStorage.getItem('ae_refresh');
+    if(refresh){
+      try{
+        const refRes=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+          body:JSON.stringify({refresh_token:refresh})
+        });
+        const refData=await refRes.json();
+        if(refRes.ok&&refData.access_token){
+          activeToken=refData.access_token;
+          localStorage.setItem('ae_token',refData.access_token);
+          if(refData.refresh_token)localStorage.setItem('ae_refresh',refData.refresh_token);
+        }
+      }catch(e){console.log('Token refresh failed:',e);}
+    }
+  }
+
+  // Load usage if we have a token
+  if(currentUser&&activeToken){
+    try{
       const month=new Date().toISOString().slice(0,7);
       const res=await fetch(SUPABASE_URL+'/rest/v1/user_usage?user_id=eq.'+currentUser.id+'&month=eq.'+month+'&select=*',{
         headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+token}
@@ -367,12 +394,18 @@ window.addEventListener('DOMContentLoaded',async function(){
         analysesUsed=data[0].analyses_count||0;
         userPlan=data[0].plan||data[0].plsn||'free';
       }
-    }catch(e){
-      // If error, still show user as logged in from stored data
-      console.log('Load error:',e);
-    }
+    }catch(e){console.log('Usage load error:',e);}
   }
+
+  // If token is missing but user exists, try to refresh silently
+  if(currentUser&&!token){
+    // Token expired - clear and re-login on next analyze
+    userPlan='free';
+    analysesUsed=0;
+  }
+
   renderNav();
+
   // Reopen VIN if coming from dashboard
   const reopen=localStorage.getItem('ae_reopen_vin');
   if(reopen){document.getElementById('vin').value=reopen;localStorage.removeItem('ae_reopen_vin');viewingReport=true;lookupVIN();}
@@ -466,7 +499,15 @@ async function lookupVIN(){
   if(vin.length!==17){showError('VIN must be exactly 17 characters.');return;}
 
   if(!currentUser){
-    // Not logged in - redirect to signup
+    window.location.href='/index.html';
+    return;
+  }
+  // If token expired, force re-login
+  const tkn=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token');
+  if(!tkn){
+    localStorage.removeItem('ae_user');
+    localStorage.removeItem('ae_token');
+    localStorage.removeItem('ae_refresh');
     window.location.href='/index.html';
     return;
   }

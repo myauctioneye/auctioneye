@@ -520,8 +520,15 @@ async function handleSignIn(){
     const pData=await pRes.json();
     const profile=pData&&pData.length?pData[0]:{};
     const user={...data.user,...profile};
-    if(remember){localStorage.setItem('ae_token',data.access_token);localStorage.setItem('ae_user',JSON.stringify(user));}
-    else{sessionStorage.setItem('ae_token',data.access_token);sessionStorage.setItem('ae_user',JSON.stringify(user));}
+    if(remember){
+      localStorage.setItem('ae_token',data.access_token);
+      localStorage.setItem('ae_user',JSON.stringify(user));
+      if(data.refresh_token)localStorage.setItem('ae_refresh',data.refresh_token);
+    }else{
+      sessionStorage.setItem('ae_token',data.access_token);
+      sessionStorage.setItem('ae_user',JSON.stringify(user));
+      if(data.refresh_token)sessionStorage.setItem('ae_refresh',data.refresh_token);
+    }
     window.location.href='/dashboard.html';
   }catch(e){err.textContent=e.message||'Something went wrong.';err.style.display='block';btn.disabled=false;btn.textContent='Sign in';}
 }
