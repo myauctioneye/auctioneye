@@ -337,6 +337,20 @@ footer{background:rgba(0,0,0,0.4);border-top:1px solid rgba(255,255,255,0.04);pa
   </div>
 </div>
 
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-overlay" id="forgot-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('forgot-modal').classList.remove('open')">×</button>
+    <div class="modal-title">Reset password</div>
+    <div class="modal-sub">Enter your email and we'll send you a reset link.</div>
+    <div id="forgot-error" class="modal-error"></div>
+    <div id="forgot-success" class="modal-success"></div>
+    <input id="forgot-email" class="modal-input" type="email" placeholder="Your email address"/>
+    <button class="modal-btn" id="forgot-btn" onclick="handleForgotPassword()">Send reset link</button>
+    <div class="modal-switch">Remember your password? <span onclick="openSignIn()">Sign in</span></div>
+  </div>
+</div>
+
 <footer>
   <div class="footer-inner">
     <a class="footer-logo" href="/"><div class="footer-logo-icon"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="white" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" fill="white"/></svg></div><span class="footer-logo-text">AuctionEye</span></a>
@@ -354,7 +368,10 @@ footer{background:rgba(0,0,0,0.4);border-top:1px solid rgba(255,255,255,0.04);pa
     <div class="modal-error" id="si-error"></div>
     <input id="si-login" class="modal-input" type="text" placeholder="Email or username"/>
     <input id="si-password" class="modal-input" type="password" placeholder="Password"/>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;"><input type="checkbox" id="si-remember" checked style="accent-color:#84CC16;"/><label for="si-remember" style="font-size:13px;color:rgba(255,255,255,0.4);cursor:pointer;">Remember me</label></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="si-remember" checked style="accent-color:#84CC16;"/><label for="si-remember" style="font-size:13px;color:rgba(255,255,255,0.4);cursor:pointer;">Remember me</label></div>
+      <span onclick="openForgotPassword()" style="font-size:13px;color:#84CC16;cursor:pointer;">Forgot password?</span>
+    </div>
     <button class="modal-btn" id="si-btn" onclick="handleSignIn()">Sign in</button>
     <div class="modal-switch">Don't have an account? <span onclick="openSignup()">Sign up free</span></div>
   </div>
@@ -429,6 +446,7 @@ function openSignup(){
   document.getElementById('su-success').style.display='none';
 }
 document.getElementById('signin-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+document.getElementById('forgot-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 document.getElementById('signup-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 
 // STRIPE
@@ -449,6 +467,34 @@ window.addEventListener('DOMContentLoaded',function(){
     }catch(e){}
   }
 });
+
+function openForgotPassword(){
+  document.getElementById('signin-modal').classList.remove('open');
+  document.getElementById('forgot-modal').classList.add('open');
+  document.getElementById('forgot-error').style.display='none';
+  document.getElementById('forgot-success').style.display='none';
+  document.getElementById('forgot-email').value='';
+}
+
+async function handleForgotPassword(){
+  const email=document.getElementById('forgot-email').value.trim();
+  const btn=document.getElementById('forgot-btn');
+  const err=document.getElementById('forgot-error');
+  const suc=document.getElementById('forgot-success');
+  err.style.display='none';suc.style.display='none';
+  if(!email||!email.includes('@')){err.textContent='Enter a valid email address.';err.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Sending...';
+  try{
+    const res=await fetch(SUPABASE_URL+'/auth/v1/recover',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+      body:JSON.stringify({email})
+    });
+    if(!res.ok)throw new Error('Could not send reset email');
+    suc.textContent='Reset link sent! Check your email.';suc.style.display='block';
+  }catch(e){err.textContent='Could not send reset email. Try again.';err.style.display='block';}
+  btn.disabled=false;btn.textContent='Send reset link';
+}
 
 async function handleSignIn(){
   const login=document.getElementById('si-login').value.trim();
