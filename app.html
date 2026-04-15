@@ -408,18 +408,23 @@ function renderNav(){
   const nav=document.getElementById('nav-right');
   const usageWrap=document.getElementById('usage-wrap');
   if(!nav)return;
-  if(currentUser){
-    const title=currentUser.gender==='male'?'Mr.':currentUser.gender==='female'?'Ms.':(currentUser.gender==='nonbinary'||currentUser.gender==='trans')?'Mx.':'';
-    const name=(currentUser.first_name&&currentUser.last_name)?(title?title+' ':'')+currentUser.first_name+' '+currentUser.last_name:currentUser.email.split('@')[0];
-    const chipClass='chip-'+userPlan;
-    const planLabel=userPlan.charAt(0).toUpperCase()+userPlan.slice(1);
-    nav.innerHTML=`<div class="nav-user"><span class="nav-name">${name}</span><span class="plan-chip ${chipClass}">${planLabel}</span></div><a href="/dashboard.html" class="btn-nav btn-nav-ghost">Dashboard</a><button class="btn-nav btn-nav-ghost" onclick="signOut()">Sign out</button>`;
-    usageWrap.classList.remove('hidden');
-    renderUsage();
-  }else{
-    nav.innerHTML=`<button class="btn-nav btn-nav-ghost" onclick="openAuth('signin')">Sign in</button><button class="btn-nav btn-nav-lime" onclick="openAuth('signup')">Start free</button>`;
-    usageWrap.classList.add('hidden');
+  // Always read fresh from storage
+  const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  if(stored){
+    try{
+      const u=JSON.parse(stored);
+      const title=u.gender==='male'?'Mr.':u.gender==='female'?'Ms.':(u.gender==='nonbinary'||u.gender==='trans')?'Mx.':'';
+      const name=(u.first_name&&u.last_name)?(title?title+' ':'')+u.first_name+' '+u.last_name:u.email.split('@')[0];
+      const plan=userPlan||'free';
+      const planLabel=plan.charAt(0).toUpperCase()+plan.slice(1);
+      nav.innerHTML='<div class="nav-user"><span class="nav-name">'+name+'</span><span class="plan-chip chip-'+plan+'">'+planLabel+'</span></div><a href="/dashboard.html" class="btn-nav btn-nav-ghost">Dashboard</a><button class="btn-nav btn-nav-ghost" onclick="signOut()">Sign out</button>';
+      if(usageWrap)usageWrap.classList.remove('hidden');
+      renderUsage();
+      return;
+    }catch(e){}
   }
+  nav.innerHTML='<button class="btn-nav btn-nav-ghost" onclick="openAuth('signin')">Sign in</button><button class="btn-nav btn-nav-lime" onclick="openAuth('signup')">Start free</button>';
+  if(usageWrap)usageWrap.classList.add('hidden');
 }
 
 function renderUsage(){
