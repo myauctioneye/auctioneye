@@ -5,158 +5,116 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AuctionEye — Analyze a lot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{font-family:'DM Sans',sans-serif;background:#080E08;color:#fff;min-height:100vh;}
-h1,h2,h3,.syne{font-family:'Syne',sans-serif;}
+h1,h2,h3{font-family:'Syne',sans-serif;}
 
-/* NAV */
-nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:60px;background:rgba(8,14,8,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.06);}
+nav{position:sticky;top:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;background:rgba(8,14,8,0.97);border-bottom:1px solid rgba(132,204,22,0.08);}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
 .logo-icon{width:30px;height:30px;background:linear-gradient(135deg,#4D7C0F,#84CC16);border-radius:8px;display:flex;align-items:center;justify-content:center;}
 .logo-text{font-size:17px;font-weight:700;color:#fff;font-family:'Syne',sans-serif;}
-.nav-right{display:flex;align-items:center;gap:10px;}
-.nav-user{display:flex;align-items:center;gap:8px;}
+#nav-user-section{display:flex;align-items:center;gap:12px;}
 .nav-name{font-size:13px;color:rgba(255,255,255,0.7);}
-.plan-chip{font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;font-family:'Syne',sans-serif;}
-.chip-free{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);}
-.chip-basic{background:rgba(132,204,22,0.12);color:#84CC16;}
-.chip-pro{background:rgba(34,197,94,0.12);color:#22C55E;}
-.chip-dealer{background:rgba(245,158,11,0.12);color:#F59E0B;}
-.btn-nav{padding:6px 14px;font-size:13px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;text-decoration:none;display:inline-block;}
-.btn-nav-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);}
-.btn-nav-ghost:hover{background:rgba(255,255,255,0.06);color:#fff;}
-.btn-nav-lime{background:#84CC16;border:none;color:#080E08;font-weight:700;}
-.btn-nav-lime:hover{background:#A3E635;}
+.nav-plan{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:rgba(132,204,22,0.12);color:#84CC16;}
+.btn-dash{padding:7px 16px;font-size:13px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;background:transparent;color:rgba(255,255,255,0.7);cursor:pointer;text-decoration:none;display:inline-block;transition:all 0.2s;}
+.btn-dash:hover{background:rgba(255,255,255,0.06);color:#fff;}
+.btn-signout{padding:7px 16px;font-size:13px;border:1px solid rgba(239,68,68,0.2);border-radius:8px;background:transparent;color:rgba(239,68,68,0.7);cursor:pointer;transition:all 0.2s;}
+.btn-signout:hover{background:rgba(239,68,68,0.08);color:#EF4444;}
 
-/* USAGE BAR */
-.usage-bar{background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.05);padding:8px 2rem;display:flex;align-items:center;gap:12px;}
-.usage-label{font-size:12px;color:rgba(255,255,255,0.4);}
-.usage-track{flex:1;max-width:200px;height:4px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden;}
-.usage-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#4D7C0F,#84CC16);transition:width 0.6s ease;}
+.usage-bar{background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.04);padding:8px 2rem;display:none;align-items:center;gap:12px;}
+.usage-bar.show{display:flex;}
+.usage-lbl{font-size:12px;color:rgba(255,255,255,0.4);}
+.usage-track{flex:1;max-width:180px;height:4px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden;}
+.usage-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#4D7C0F,#84CC16);transition:width 0.6s;}
 .usage-fill.warn{background:linear-gradient(90deg,#92400E,#F59E0B);}
 .usage-fill.full{background:linear-gradient(90deg,#7F1D1D,#EF4444);}
-.usage-count{font-size:12px;color:rgba(255,255,255,0.4);}
-.hidden{display:none!important;}
+.usage-txt{font-size:12px;color:rgba(255,255,255,0.4);}
 
-/* MAIN */
-.main{max-width:680px;margin:0 auto;padding:2rem 1.5rem;}
+.wrap{max-width:660px;margin:0 auto;padding:2.5rem 1.5rem;}
+.page-title{font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-1px;margin-bottom:6px;}
+.page-sub{font-size:15px;color:rgba(255,255,255,0.4);margin-bottom:2rem;}
 
-/* HERO TEXT */
-.hero-text{text-align:center;margin-bottom:2rem;padding-top:1rem;}
-.hero-text h1{font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-1px;margin-bottom:8px;}
-.hero-text p{font-size:15px;color:rgba(255,255,255,0.4);line-height:1.6;}
-
-/* CARDS */
-.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:1.75rem;margin-bottom:1rem;}
-.card-label{font-size:12px;font-weight:700;color:rgba(132,204,22,0.7);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;}
-
-/* VIN INPUT */
-.vin-wrap{display:flex;gap:10px;}
-.vin-input{flex:1;padding:12px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-size:15px;font-family:monospace;color:#fff;outline:none;transition:border-color 0.2s;}
-.vin-input:focus{border-color:rgba(132,204,22,0.4);}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:1.5rem;margin-bottom:1rem;}
+.card-lbl{font-size:11px;font-weight:700;color:#84CC16;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1rem;}
+.vin-row{display:flex;gap:10px;}
+.vin-input{flex:1;padding:13px 16px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;font-size:15px;font-family:monospace;color:#fff;outline:none;transition:border-color 0.2s;}
+.vin-input:focus{border-color:rgba(132,204,22,0.5);}
 .vin-input::placeholder{color:rgba(255,255,255,0.2);font-family:'DM Sans',sans-serif;}
-.analyze-btn{padding:14px 28px;background:#84CC16;color:#080E08;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all 0.2s;white-space:nowrap;box-shadow:0 4px 20px rgba(132,204,22,0.3);}
-.analyze-btn:hover{background:#A3E635;}
-.analyze-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.analyze-btn{padding:13px 28px;background:#84CC16;color:#080E08;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all 0.2s;box-shadow:0 4px 20px rgba(132,204,22,0.25);white-space:nowrap;}
+.analyze-btn:hover{background:#A3E635;transform:translateY(-1px);}
+.analyze-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
 
-/* STEPS */
-.steps{display:flex;gap:8px;margin-top:1rem;}
+.steps{display:flex;gap:1.5rem;margin-top:1rem;flex-wrap:wrap;}
 .step{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,0.3);}
-.step-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.1);flex-shrink:0;}
-.step-dot.loading{background:#F59E0B;animation:dotPulse 1s ease-in-out infinite;}
-.step-dot.done{background:#84CC16;}
-.step-dot.error{background:#EF4444;}
-@keyframes dotPulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.1);flex-shrink:0;transition:background 0.2s;}
+.dot.active{background:#F59E0B;animation:pulse 1s infinite;}
+.dot.done{background:#84CC16;}
+.dot.error{background:#EF4444;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
 
-/* ERROR */
 .error-box{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:10px 14px;font-size:13px;color:#EF4444;margin-top:10px;display:none;}
 
-/* VEHICLE CARD */
-.vehicle-name{font-size:20px;font-weight:700;font-family:'Syne',sans-serif;margin-bottom:8px;}
-.vehicle-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;}
+.v-name{font-size:20px;font-weight:800;font-family:'Syne',sans-serif;margin-bottom:8px;}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem;}
 .tag{font-size:12px;padding:4px 10px;border-radius:999px;}
-.tag-lime{background:rgba(132,204,22,0.1);color:#84CC16;border:1px solid rgba(132,204,22,0.15);}
-.tag-blue{background:rgba(59,130,246,0.1);color:#60A5FA;border:1px solid rgba(59,130,246,0.15);}
-.tag-green{background:rgba(34,197,94,0.1);color:#22C55E;border:1px solid rgba(34,197,94,0.15);}
-.specs-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.tag-lime{background:rgba(132,204,22,0.1);color:#84CC16;border:1px solid rgba(132,204,22,0.2);}
+.tag-blue{background:rgba(59,130,246,0.1);color:#60A5FA;border:1px solid rgba(59,130,246,0.2);}
+.tag-green{background:rgba(34,197,94,0.1);color:#22C55E;border:1px solid rgba(34,197,94,0.2);}
 .spec-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;}
 .spec-row:last-child{border-bottom:none;}
-.spec-key{color:rgba(255,255,255,0.35);}
-.spec-val{font-weight:500;color:rgba(255,255,255,0.8);text-align:right;}
+.spec-k{color:rgba(255,255,255,0.35);}
+.spec-v{font-weight:500;color:rgba(255,255,255,0.85);}
 
-/* BID FORM */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-.form-group label{display:block;font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;}
-.form-input{width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;outline:none;transition:border-color 0.2s;}
-.form-input:focus{border-color:rgba(132,204,22,0.4);}
-.form-select{width:100%;padding:10px 14px;background:#0D150D;border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:rgba(255,255,255,0.7);outline:none;appearance:none;}
+.fg label{display:block;font-size:11px;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px;}
+.fg input,.fg select{width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;outline:none;transition:border-color 0.2s;}
+.fg input:focus{border-color:rgba(132,204,22,0.4);}
+.fg select{background:#0D150D;color:rgba(255,255,255,0.7);}
 .calc-btn{width:100%;padding:13px;background:#84CC16;color:#080E08;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all 0.2s;margin-top:4px;}
 .calc-btn:hover{background:#A3E635;}
 
-/* RESULTS */
-.verdict-card{border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem;border:1.5px solid;}
-.verdict-card.v-deal{background:rgba(132,204,22,0.06);border-color:rgba(132,204,22,0.25);}
-.verdict-card.v-neutral{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.25);}
-.verdict-card.v-trap{background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.25);}
-.verdict-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
-.verdict-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0;}
+.verdict-box{border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem;border:1.5px solid;}
+.v-deal{background:rgba(132,204,22,0.06);border-color:rgba(132,204,22,0.3);}
+.v-neutral{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.3);}
+.v-trap{background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.3);}
+.vrow{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.vicon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0;}
 .vi-deal{background:#84CC16;color:#080E08;}
 .vi-neutral{background:#F59E0B;color:#080E08;}
 .vi-trap{background:#EF4444;color:#fff;}
-.verdict-title{font-size:22px;font-weight:800;font-family:'Syne',sans-serif;}
+.vtitle{font-size:22px;font-weight:800;font-family:'Syne',sans-serif;}
 .vt-deal{color:#84CC16;}.vt-neutral{color:#F59E0B;}.vt-trap{color:#EF4444;}
-.verdict-sub{font-size:13px;color:rgba(255,255,255,0.45);}
-.verdict-ai{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);}
+.vsub{font-size:13px;color:rgba(255,255,255,0.4);}
+.vai{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);margin-top:4px;}
 
-.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;}
-.metric{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:0.875rem;text-align:center;}
-.metric-label{font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
-.metric-val{font-size:20px;font-weight:800;font-family:'Syne',sans-serif;}
-.mv-white{color:#fff;}.mv-lime{color:#84CC16;}.mv-amber{color:#F59E0B;}.mv-red{color:#EF4444;}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;}
+.metric{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:.875rem;text-align:center;}
+.mlbl{font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+.mval{font-size:20px;font-weight:800;font-family:'Syne',sans-serif;}
+.c-white{color:#fff;}.c-lime{color:#84CC16;}.c-amber{color:#F59E0B;}.c-red{color:#EF4444;}
 
 .risk-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;font-size:13px;color:rgba(255,255,255,0.5);}
-.risk-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
-.rd-green{background:#84CC16;}.rd-amber{background:#F59E0B;}.rd-red{background:#EF4444;}
+.rdot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.rd-lime{background:#84CC16;}.rd-amber{background:#F59E0B;}.rd-red{background:#EF4444;}
 
-.reset-btn{width:100%;padding:12px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;transition:all 0.2s;margin-top:0.5rem;}
+.reset-btn{width:100%;padding:12px;background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;transition:all 0.2s;margin-top:4px;}
 .reset-btn:hover{background:rgba(255,255,255,0.08);color:#fff;}
 
-/* LIMIT MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(12px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;}
-.modal-overlay.show{display:flex;}
-.modal-box{background:#0D150D;border:1px solid rgba(132,204,22,0.15);border-radius:18px;padding:2rem;width:100%;max-width:420px;text-align:center;}
-.modal-box h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;}
-.modal-box p{font-size:14px;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:1.5rem;}
-.modal-btns{display:flex;flex-direction:column;gap:8px;}
-.modal-btn-lime{padding:12px;background:#84CC16;color:#080E08;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;}
-.modal-btn-ghost{padding:12px;background:transparent;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.hidden{display:none!important;}
 
-/* AUTH MODAL */
-.auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(12px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;overflow-y:auto;}
-.auth-overlay.show{display:flex;}
-.auth-box{background:#0D150D;border:1px solid rgba(132,204,22,0.1);border-radius:18px;padding:2rem;width:100%;max-width:400px;position:relative;margin:auto;}
-.auth-close{position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:22px;cursor:pointer;color:rgba(255,255,255,0.4);}
-.auth-tabs{display:flex;gap:0;margin-bottom:1.5rem;background:rgba(255,255,255,0.04);border-radius:10px;padding:4px;}
-.auth-tab{flex:1;padding:8px;font-size:13px;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.4);border-radius:8px;transition:all 0.2s;}
-.auth-tab.active{background:#84CC16;color:#080E08;}
-.auth-input{width:100%;padding:10px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,0.04);margin-bottom:10px;box-sizing:border-box;outline:none;}
-.auth-select{width:100%;padding:10px 14px;border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:rgba(255,255,255,0.5);background:#0D150D;margin-bottom:10px;box-sizing:border-box;appearance:none;outline:none;}
-.auth-btn{width:100%;padding:12px;background:#84CC16;color:#080E08;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;}
-.auth-error{background:rgba(239,68,68,0.1);color:#EF4444;border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;}
-.auth-success{background:rgba(132,204,22,0.1);color:#84CC16;border:1px solid rgba(132,204,22,0.2);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px;display:none;}
-.auth-switch{font-size:12px;color:rgba(255,255,255,0.3);text-align:center;margin-top:12px;}
-.auth-switch span{color:#84CC16;cursor:pointer;font-weight:500;}
+.limit-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem;}
+.limit-overlay.show{display:flex;}
+.limit-box{background:#0D150D;border:1px solid rgba(132,204,22,0.15);border-radius:18px;padding:2rem;width:100%;max-width:400px;text-align:center;}
+.limit-box h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px;}
+.limit-box p{font-size:14px;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:1.5rem;}
+.lbtn{width:100%;padding:12px;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;margin-bottom:8px;}
+.lbtn-lime{background:#84CC16;color:#080E08;}
+.lbtn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);}
 
-@media(max-width:480px){
-  .form-grid{grid-template-columns:1fr;}
-  .metrics-grid{grid-template-columns:1fr 1fr;}
-  .vin-wrap{flex-direction:column;}
-  nav{padding:0 1rem;}
-  .main{padding:1.5rem 1rem;}
-}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr;}.metrics{grid-template-columns:1fr 1fr;}.vin-row{flex-direction:column;}.steps{gap:1rem;}}
 </style>
 </head>
 <body>
@@ -166,181 +124,80 @@ nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-co
     <div class="logo-icon"><svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="white" stroke-width="1.5"/><circle cx="9" cy="9" r="2.5" fill="white"/><line x1="9" y1="1" x2="9" y2="3.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="14.5" x2="9" y2="17" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="9" x2="3.5" y2="9" stroke="white" stroke-width="1.5" stroke-linecap="round"/><line x1="14.5" y1="9" x2="17" y2="9" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div>
     <span class="logo-text">AuctionEye</span>
   </a>
-  <div class="nav-right" id="nav-right">
-    <button class="btn-nav btn-nav-ghost" onclick="openAuth('signin')">Sign in</button>
-    <button class="btn-nav btn-nav-lime" onclick="openAuth('signup')">Start free</button>
-  </div>
+  <div id="nav-user-section"></div>
 </nav>
 
-<div id="usage-wrap" class="usage-bar hidden">
-  <span class="usage-label">Monthly usage</span>
+<div class="usage-bar" id="usage-bar">
+  <span class="usage-lbl">Usage</span>
   <div class="usage-track"><div class="usage-fill" id="usage-fill" style="width:0%"></div></div>
-  <span class="usage-count" id="usage-count">0 / 5</span>
+  <span class="usage-txt" id="usage-txt">0 / 5</span>
 </div>
 
-<div class="main">
-  <div class="hero-text">
-    <h1>Analyze a lot</h1>
-    <p>Paste any VIN from Copart, IAAI, or any auction. Get your verdict in seconds.</p>
-  </div>
+<div class="wrap">
+  <div class="page-title">Analyze a lot</div>
+  <p class="page-sub">Paste any VIN from Copart, IAAI, or any auction.</p>
 
-  <!-- VIN INPUT -->
   <div class="card">
-    <div class="card-label">Enter the lot VIN</div>
-    <div class="vin-wrap">
-      <input id="vin" class="vin-input" type="text" placeholder="e.g. 3FA6P0HD6HR238708" maxlength="17" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')lookupVIN()"/>
+    <div class="card-lbl">Enter the lot VIN</div>
+    <div class="vin-row">
+      <input id="vin" class="vin-input" type="text" placeholder="e.g. 3FA6P0HD6HR238708" maxlength="17" autocomplete="off" spellcheck="false" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')lookupVIN()"/>
       <button id="lookup-btn" class="analyze-btn" onclick="lookupVIN()">Analyze</button>
     </div>
     <div class="steps hidden" id="steps">
-      <div class="step"><div class="step-dot" id="d1"></div><span id="s1">Connecting to NHTSA...</span></div>
-      <div class="step"><div class="step-dot" id="d2"></div><span id="s2">Estimating market value...</span></div>
-      <div class="step"><div class="step-dot" id="d3"></div><span id="s3">Ready</span></div>
+      <div class="step"><div class="dot" id="d1"></div><span id="s1">Connecting to NHTSA...</span></div>
+      <div class="step"><div class="dot" id="d2"></div><span id="s2">Estimating market value...</span></div>
+      <div class="step"><div class="dot" id="d3"></div><span id="s3">Ready</span></div>
     </div>
     <div class="error-box" id="error-box"></div>
   </div>
 
-  <!-- VEHICLE INFO -->
   <div class="card hidden" id="vehicle-card">
-    <div class="card-label">Vehicle</div>
-    <div class="vehicle-name" id="v-name"></div>
-    <div class="vehicle-tags" id="v-tags"></div>
+    <div class="card-lbl">Vehicle</div>
+    <div class="v-name" id="v-name"></div>
+    <div class="tags" id="v-tags"></div>
     <div id="v-specs"></div>
   </div>
 
-  <!-- BID FORM -->
   <div class="card hidden" id="bid-card">
-    <div class="card-label">Lot details</div>
+    <div class="card-lbl">Lot details</div>
     <div class="form-grid">
-      <div class="form-group">
-        <label>Your bid ($)</label>
-        <input id="bid" class="form-input" type="number" placeholder="3000" min="0"/>
+      <div class="fg"><label>Your bid ($)</label><input id="bid" type="number" placeholder="3000" min="0"/></div>
+      <div class="fg"><label>Repair estimate ($)</label><input id="repair" type="number" placeholder="2000" min="0"/></div>
+      <div class="fg"><label>Market value ($)</label><input id="market" type="number" placeholder="8000" min="0"/></div>
+      <div class="fg"><label>Transport ($)</label><input id="transport" type="number" placeholder="0" min="0"/></div>
+      <div class="fg"><label>Damage type</label>
+        <select id="damage"><option value="">None / Unknown</option><option>Front end</option><option>Rear end</option><option>Side</option><option>Rollover</option><option>Flood / water</option><option>Fire</option><option>Hail</option><option>Mechanical</option><option>Minor dents / scratches</option></select>
       </div>
-      <div class="form-group">
-        <label>Repair estimate ($)</label>
-        <input id="repair" class="form-input" type="number" placeholder="2000" min="0"/>
-      </div>
-      <div class="form-group">
-        <label>Market value ($)</label>
-        <input id="market" class="form-input" type="number" placeholder="8000" min="0"/>
-      </div>
-      <div class="form-group">
-        <label>Transport ($)</label>
-        <input id="transport" class="form-input" type="number" placeholder="0" min="0"/>
-      </div>
-      <div class="form-group">
-        <label>Damage type</label>
-        <select id="damage" class="form-select">
-          <option value="">None / Unknown</option>
-          <option>Front end</option>
-          <option>Rear end</option>
-          <option>Side</option>
-          <option>Rollover</option>
-          <option>Flood / water</option>
-          <option>Fire</option>
-          <option>Hail</option>
-          <option>Mechanical</option>
-          <option>Minor dents / scratches</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Title type</label>
-        <select id="title-type" class="form-select">
-          <option>Clean</option>
-          <option>Salvage</option>
-          <option>Rebuilt</option>
-          <option>Parts only</option>
-          <option>Certificate of destruction</option>
-        </select>
+      <div class="fg"><label>Title type</label>
+        <select id="title-type"><option>Clean</option><option>Salvage</option><option>Rebuilt</option><option>Parts only</option><option>Certificate of destruction</option></select>
       </div>
     </div>
     <button class="calc-btn" onclick="analyze()">Get verdict →</button>
   </div>
 
-  <!-- RESULTS -->
   <div id="results" class="hidden">
-    <!-- Verdict -->
-    <div class="verdict-card" id="verdict-box">
-      <div class="verdict-row">
-        <div class="verdict-icon" id="v-icon"></div>
-        <div>
-          <div class="verdict-title" id="v-verdict"></div>
-          <div class="verdict-sub" id="v-sub"></div>
-        </div>
-      </div>
-      <div class="verdict-ai" id="ai-text"></div>
+    <div class="verdict-box" id="verdict-box">
+      <div class="vrow"><div class="vicon" id="v-icon"></div><div><div class="vtitle" id="v-verdict"></div><div class="vsub" id="v-sub"></div></div></div>
+      <div class="vai" id="ai-text"></div>
     </div>
-
-    <!-- Metrics -->
-    <div class="metrics-grid">
-      <div class="metric"><div class="metric-label">Total cost</div><div class="metric-val mv-white" id="m-total"></div></div>
-      <div class="metric"><div class="metric-label">Margin</div><div class="metric-val" id="m-margin"></div></div>
-      <div class="metric"><div class="metric-label">ROI</div><div class="metric-val" id="m-roi"></div></div>
+    <div class="metrics">
+      <div class="metric"><div class="mlbl">Total cost</div><div class="mval c-white" id="m-total"></div></div>
+      <div class="metric"><div class="mlbl">Margin</div><div class="mval" id="m-margin"></div></div>
+      <div class="metric"><div class="mlbl">ROI</div><div class="mval" id="m-roi"></div></div>
     </div>
-
-    <!-- Risks -->
-    <div class="card">
-      <div class="card-label">Risk flags</div>
-      <div id="risks"></div>
-    </div>
-
-    <!-- Breakdown -->
-    <div class="card">
-      <div class="card-label">Cost breakdown</div>
-      <div id="breakdown"></div>
-    </div>
-
+    <div class="card"><div class="card-lbl">Risk flags</div><div id="risks"></div></div>
+    <div class="card"><div class="card-lbl">Cost breakdown</div><div id="breakdown"></div></div>
     <button class="reset-btn" onclick="resetApp()">← Analyze another lot</button>
   </div>
 </div>
 
-<!-- LIMIT MODAL -->
-<div class="modal-overlay" id="limit-modal">
-  <div class="modal-box">
+<div class="limit-overlay" id="limit-overlay">
+  <div class="limit-box">
     <div style="font-size:32px;margin-bottom:12px;">🔒</div>
     <h2>Monthly limit reached</h2>
-    <p id="limit-msg">You've used all your analyses for this month. Upgrade to keep bidding smart.</p>
-    <div class="modal-btns">
-      <button class="modal-btn-lime" onclick="window.location.href='/dashboard.html'">Upgrade plan →</button>
-      <button class="modal-btn-ghost" onclick="document.getElementById('limit-modal').classList.remove('show')">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- AUTH MODAL -->
-<div class="auth-overlay" id="auth-modal">
-  <div class="auth-box">
-    <button class="auth-close" onclick="closeAuth()">×</button>
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-signin" onclick="switchTab('signin')">Sign in</button>
-      <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Sign up</button>
-    </div>
-    <div class="auth-error" id="auth-error"></div>
-    <div class="auth-success" id="auth-success"></div>
-
-    <!-- Sign in fields -->
-    <div id="signin-fields">
-      <input id="si-login" class="auth-input" type="text" placeholder="Email or username"/>
-      <input id="si-password" class="auth-input" type="password" placeholder="Password"/>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-        <input type="checkbox" id="si-remember" checked style="accent-color:#84CC16;"/>
-        <label for="si-remember" style="font-size:13px;color:rgba(255,255,255,0.4);cursor:pointer;">Remember me</label>
-      </div>
-    </div>
-
-    <!-- Sign up fields -->
-    <div id="signup-fields" style="display:none;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0;">
-        <input id="su-firstname" class="auth-input" type="text" placeholder="First name" style="margin-bottom:10px;"/>
-        <input id="su-lastname" class="auth-input" type="text" placeholder="Last name" style="margin-bottom:10px;"/>
-      </div>
-      <input id="su-username" class="auth-input" type="text" placeholder="Username (e.g. carflip99)"/>
-      <select id="su-gender" class="auth-select"><option value="">Select gender</option><option value="male">Male (Mr.)</option><option value="female">Female (Ms.)</option><option value="nonbinary">Non-binary (Mx.)</option><option value="trans">Transgender (Mx.)</option><option value="other">Prefer not to say</option></select>
-      <input id="su-email" class="auth-input" type="email" placeholder="Email address"/>
-      <input id="su-password" class="auth-input" type="password" placeholder="Password (min 6 characters)"/>
-    </div>
-
-    <button class="auth-btn" id="auth-btn" onclick="handleAuth()">Sign in</button>
-    <div class="auth-switch" id="auth-switch">Don't have an account? <span onclick="switchTab('signup')">Sign up free</span></div>
+    <p id="limit-msg">You've used all your analyses this month. Upgrade to keep going.</p>
+    <button class="lbtn lbtn-lime" onclick="window.location.href='/dashboard.html'">Upgrade plan →</button>
+    <button class="lbtn lbtn-ghost" onclick="document.getElementById('limit-overlay').classList.remove('show')">Close</button>
   </div>
 </div>
 
@@ -348,129 +205,62 @@ nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-co
 const SUPABASE_URL='https://gwwiuosdyrngtpbxuknq.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3d2l1b3NkeXJuZ3RwYnh1a25xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3ODAyODEsImV4cCI6MjA5MTM1NjI4MX0.1C9P21lICqB4_SzCM82YkyalvPF-FaO7t6LhYg1goFM';
 const PLAN_LIMITS={free:5,basic:30,pro:100,dealer:400};
+let vData={}, analysesUsed=0, userPlan='free', viewingReport=false;
 
-let currentUser=null, userPlan='free', analysesUsed=0, vData={}, viewingReport=false;
+// ── NAV: always read from localStorage directly ──
+function buildNav(){
+  const nav=document.getElementById('nav-user-section');
+  const raw=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  if(!raw){
+    nav.innerHTML='<a href="/index.html" style="padding:7px 16px;font-size:13px;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.7);text-decoration:none;">Sign in</a><a href="/index.html" style="padding:7px 16px;font-size:13px;font-weight:700;border:none;border-radius:8px;background:#84CC16;color:#080E08;text-decoration:none;cursor:pointer;margin-left:8px;">Start free</a>';
+    return null;
+  }
+  try{
+    const u=JSON.parse(raw);
+    const title=u.gender==='male'?'Mr.':u.gender==='female'?'Ms.':(u.gender==='nonbinary'||u.gender==='trans')?'Mx.':'';
+    const name=(u.first_name&&u.last_name)?(title?title+' ':'')+u.first_name+' '+u.last_name:u.email.split('@')[0];
+    nav.innerHTML='<span class="nav-name">'+name+'</span><span class="nav-plan">'+userPlan.charAt(0).toUpperCase()+userPlan.slice(1)+'</span><a href="/dashboard.html" class="btn-dash">Dashboard</a><button class="btn-signout" onclick="signOut()">Sign out</button>';
+    return u;
+  }catch(e){return null;}
+}
 
 window.addEventListener('DOMContentLoaded',async function(){
-  const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
-  let token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token');
+  const token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token');
+  const raw=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
 
-  // Load user from storage regardless of token
-  if(stored){
-    try{currentUser=JSON.parse(stored);}
-    catch(e){currentUser=null;}
-  }
-
-  // Try to refresh token if missing or expired
-  if(currentUser&&!token){
+  if(raw&&token){
     try{
-      // Re-authenticate using stored credentials won't work without password
-      // So just show nav with user info, token will be checked on analyze
-      console.log('Token missing, will re-auth on analyze');
-    }catch(e){}
-  }
-
-  // Load usage data if token exists
-  if(currentUser&&token){
-    try{
+      const u=JSON.parse(raw);
       const month=new Date().toISOString().slice(0,7);
-      const res=await fetch(SUPABASE_URL+'/rest/v1/user_usage?user_id=eq.'+currentUser.id+'&month=eq.'+month+'&select=*',{
-        headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+token}
-      });
+      const res=await fetch(SUPABASE_URL+'/rest/v1/user_usage?user_id=eq.'+u.id+'&month=eq.'+month+'&select=*',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+token}});
       const data=await res.json();
-      if(data&&data.length>0){
-        analysesUsed=data[0].analyses_count||0;
-        userPlan=data[0].plan||data[0].plsn||'free';
-      }
+      if(data&&data.length){analysesUsed=data[0].analyses_count||0;userPlan=data[0].plan||data[0].plsn||'free';}
     }catch(e){}
   }
 
-  renderNav();
+  buildNav();
 
-  // Reopen VIN if coming from dashboard
+  // Usage bar
+  if(raw){
+    const limit=PLAN_LIMITS[userPlan];
+    const pct=Math.min(100,(analysesUsed/limit)*100);
+    document.getElementById('usage-bar').classList.add('show');
+    document.getElementById('usage-txt').textContent=analysesUsed+' / '+limit;
+    const fill=document.getElementById('usage-fill');
+    fill.style.width=pct+'%';
+    fill.className='usage-fill'+(pct>=100?' full':pct>=80?' warn':'');
+  }
+
   const reopen=localStorage.getItem('ae_reopen_vin');
   if(reopen){document.getElementById('vin').value=reopen;localStorage.removeItem('ae_reopen_vin');viewingReport=true;lookupVIN();}
 });
 
-async function loadUserData(){
-  try{
-    const token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token')||SUPABASE_KEY;
-    const month=new Date().toISOString().slice(0,7);
-    const res=await fetch(SUPABASE_URL+'/rest/v1/user_usage?user_id=eq.'+currentUser.id+'&month=eq.'+month+'&select=*',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+token}});
-    const data=await res.json();
-    if(data&&data.length){analysesUsed=data[0].analyses_count||0;userPlan=data[0].plan||data[0].plsn||'free';}
-    else{analysesUsed=0;userPlan='free';}
-  }catch(e){analysesUsed=0;userPlan='free';}
-  renderUsage();
-}
-
-function renderNav(){
-  const nav=document.getElementById('nav-right');
-  const usageWrap=document.getElementById('usage-wrap');
-  if(!nav)return;
-  // Always read fresh from storage
-  const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
-  if(stored){
-    try{
-      const u=JSON.parse(stored);
-      const title=u.gender==='male'?'Mr.':u.gender==='female'?'Ms.':(u.gender==='nonbinary'||u.gender==='trans')?'Mx.':'';
-      const name=(u.first_name&&u.last_name)?(title?title+' ':'')+u.first_name+' '+u.last_name:u.email.split('@')[0];
-      const plan=userPlan||'free';
-      const planLabel=plan.charAt(0).toUpperCase()+plan.slice(1);
-      nav.innerHTML='<div class="nav-user"><span class="nav-name">'+name+'</span><span class="plan-chip chip-'+plan+'">'+planLabel+'</span></div><a href="/dashboard.html" class="btn-nav btn-nav-ghost">Dashboard</a><button class="btn-nav btn-nav-ghost" onclick="signOut()">Sign out</button>';
-      if(usageWrap)usageWrap.classList.remove('hidden');
-      renderUsage();
-      return;
-    }catch(e){}
-  }
-  nav.innerHTML='<button class="btn-nav btn-nav-ghost" onclick="openAuth('signin')">Sign in</button><button class="btn-nav btn-nav-lime" onclick="openAuth('signup')">Start free</button>';
-  if(usageWrap)usageWrap.classList.add('hidden');
-}
-
-function renderUsage(){
-  const limit=PLAN_LIMITS[userPlan];
-  const pct=Math.min(100,(analysesUsed/limit)*100);
-  document.getElementById('usage-count').textContent=analysesUsed+' / '+limit;
-  const fill=document.getElementById('usage-fill');
-  fill.style.width=pct+'%';
-  fill.className='usage-fill'+(pct>=100?' full':pct>=80?' warn':'');
-}
-
-// ── COUNTER FIX: Update Supabase directly ──
-async function incrementUsage(){
-  if(!currentUser)return;
-  const token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token')||SUPABASE_KEY;
-  const month=new Date().toISOString().slice(0,7);
-  analysesUsed++;
-  renderUsage();
-  try{
-    // Try update first
-    const checkRes=await fetch(SUPABASE_URL+'/rest/v1/user_usage?user_id=eq.'+currentUser.id+'&month=eq.'+month+'&select=id,analyses_count',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+token}});
-    const checkData=await checkRes.json();
-    if(checkData&&checkData.length>0){
-      // Update existing row
-      await fetch(SUPABASE_URL+'/rest/v1/user_usage?user_id=eq.'+currentUser.id+'&month=eq.'+month,{
-        method:'PATCH',
-        headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+token,'Prefer':'return=minimal'},
-        body:JSON.stringify({analyses_count:checkData[0].analyses_count+1})
-      });
-    }else{
-      // Insert new row
-      await fetch(SUPABASE_URL+'/rest/v1/user_usage',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+token,'Prefer':'return=minimal'},
-        body:JSON.stringify({user_id:currentUser.id,month,analyses_count:1,plan:userPlan,plsn:userPlan})
-      });
-    }
-  }catch(e){console.log('Usage increment error:',e);}
-}
-
-function fmt(n){return'$'+Math.round(n).toLocaleString('en-US');}
+function fmt(n){return'$'+Math.round(n).toLocaleString();}
 function fmtP(n){return Math.round(n)+'%';}
-function setStep(n,state,txt){document.getElementById('d'+n).className='step-dot '+state;if(txt)document.getElementById('s'+n).textContent=txt;}
+function setDot(n,s,t){document.getElementById('d'+n).className='dot '+s;if(t)document.getElementById('s'+n).textContent=t;}
 function showEl(id){document.getElementById(id).classList.remove('hidden');}
 function hideEl(id){document.getElementById(id).classList.add('hidden');}
-function showError(msg){const el=document.getElementById('error-box');el.textContent=msg;el.style.display='block';}
+function showErr(m){const e=document.getElementById('error-box');e.textContent=m;e.style.display='block';}
 
 function resetApp(){
   hideEl('vehicle-card');hideEl('bid-card');hideEl('results');
@@ -482,23 +272,14 @@ function resetApp(){
 
 async function lookupVIN(){
   const vin=document.getElementById('vin').value.trim().toUpperCase();
-  if(vin.length!==17){showError('VIN must be exactly 17 characters.');return;}
+  if(vin.length!==17){showErr('VIN must be exactly 17 characters.');return;}
 
-  if(!currentUser){
-    window.location.href='/index.html';
-    return;
-  }
-  // If token expired, force re-login
-  const tkn=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token');
-  if(!tkn){
-    localStorage.removeItem('ae_user');
-    localStorage.removeItem('ae_token');
-    localStorage.removeItem('ae_refresh');
-    window.location.href='/index.html';
-    return;
-  }
+  const raw=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  if(!raw){window.location.href='/index.html';return;}
+
   if(!viewingReport&&analysesUsed>=PLAN_LIMITS[userPlan]){
-    document.getElementById('limit-modal').classList.add('show');
+    document.getElementById('limit-msg').textContent='You've used all '+PLAN_LIMITS[userPlan]+' analyses this month. Upgrade to keep going.';
+    document.getElementById('limit-overlay').classList.add('show');
     return;
   }
 
@@ -508,47 +289,38 @@ async function lookupVIN(){
 
   const btn=document.getElementById('lookup-btn');
   btn.disabled=true;btn.textContent='Looking up...';
-
-  setStep(1,'loading','Connecting to NHTSA vPIC API...');
-  setStep(2,'loading','Waiting...');setStep(3,'loading','Waiting...');
+  setDot(1,'active','Connecting to NHTSA vPIC API...');
+  setDot(2,'active','Waiting...');setDot(3,'active','Waiting...');
 
   try{
     const res=await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/'+vin+'?format=json');
-    if(!res.ok)throw new Error('Network error');
     const json=await res.json();
     const r=json.Results[0];
+    if(!r||!r.Make||r.Make.trim()===''){showErr('VIN not found. Please verify it is a valid 17-character US vehicle VIN.');btn.disabled=false;btn.textContent='Analyze';return;}
 
-    if(!r||!r.Make||r.Make.trim()===''){
-      showError('VIN not found. Please verify it is a valid 17-character US vehicle VIN.');
-      btn.disabled=false;btn.textContent='Analyze';return;
-    }
-
-    setStep(1,'done','NHTSA: data retrieved');
+    setDot(1,'done','NHTSA: data retrieved');
 
     const dispL=r.DisplacementL?parseFloat(r.DisplacementL).toFixed(1):null;
     const cyls=r.EngineCylinders||'';
-    const engineStr=dispL?dispL+'L'+(cyls?' '+cyls+'-cyl':''):(r.EngineConfiguration||'—');
+    const eng=dispL?dispL+'L'+(cyls?' '+cyls+'-cyl':''):(r.EngineConfiguration||'—');
+    vData={vin,make:r.Make||'—',model:r.Model||'—',year:r.ModelYear||'—',trim:r.Trim||'',body:r.BodyClass||'—',engine:eng,fuel:r.FuelTypePrimary||'—',drive:r.DriveType||'—',transmission:r.TransmissionStyle||'—',doors:r.Doors||'—',plant:r.PlantCity?(r.PlantCity+', '+(r.PlantCountry||'')):'—'};
 
-    vData={vin,make:r.Make||'—',model:r.Model||'—',year:r.ModelYear||'—',trim:r.Trim||'',body:r.BodyClass||'—',engine:engineStr,fuel:r.FuelTypePrimary||'—',drive:r.DriveType||'—',transmission:r.TransmissionStyle||'—',doors:r.Doors||'—',plant:r.PlantCity?(r.PlantCity+', '+(r.PlantCountry||'')):'—'};
-
-    setStep(2,'loading','Estimating market value...');
+    setDot(2,'active','Estimating market value...');
     await new Promise(r=>setTimeout(r,400));
 
-    const yearNum=parseInt(vData.year)||2018;
-    const age=Math.max(0,2026-yearNum);
+    const age=Math.max(0,2026-(parseInt(vData.year)||2018));
     const bases={FORD:9500,TOYOTA:12000,HONDA:11000,CHEVROLET:9000,NISSAN:8500,GMC:10000,RAM:11000,DODGE:8500,BMW:15000,'MERCEDES-BENZ':17000,AUDI:13000,HYUNDAI:8500,KIA:8000,JEEP:10500,SUBARU:10000,MAZDA:9000,VOLKSWAGEN:9500,LEXUS:14000};
     const base=bases[vData.make.toUpperCase()]||9000;
-    const dep=Math.max(0.25,1-(age*0.09));
-    vData.marketEst=Math.round(base*dep/100)*100;
+    vData.marketEst=Math.round(base*Math.max(0.25,1-(age*0.09))/100)*100;
     vData.marketLow=Math.round(vData.marketEst*0.83);
     vData.marketHigh=Math.round(vData.marketEst*1.17);
     document.getElementById('market').value=vData.marketEst;
 
-    setStep(2,'done','Market value estimated');
-    setStep(3,'done','Ready — enter lot details below');
+    setDot(2,'done','Market value estimated');
+    setDot(3,'done','Ready — enter lot details below');
 
-    // Increment counter only for new VINs
-    if(currentUser&&!viewingReport){
+    // Increment counter
+    if(!viewingReport){
       const lastVin=sessionStorage.getItem('ae_last_vin');
       if(lastVin!==vin){
         await incrementUsage();
@@ -557,30 +329,50 @@ async function lookupVIN(){
     }
     viewingReport=false;
 
-    renderVehicle();
-    showEl('vehicle-card');showEl('bid-card');
-    setTimeout(()=>{document.getElementById('vehicle-card').scrollIntoView({behavior:'smooth',block:'start'});},100);
+    // Render vehicle
+    document.getElementById('v-name').textContent=vData.year+' '+vData.make+' '+vData.model+(vData.trim?' '+vData.trim:'');
+    document.getElementById('v-tags').innerHTML='<span class="tag tag-lime">'+vData.body+'</span><span class="tag tag-blue">'+vData.engine+'</span><span class="tag tag-green">Est. '+fmt(vData.marketLow)+' – '+fmt(vData.marketHigh)+'</span>';
+    const specs=[['Engine',vData.engine],['Fuel',vData.fuel],['Drive',vData.drive],['Transmission',vData.transmission],['Doors',vData.doors],['Assembly',vData.plant],['Market est.',fmt(vData.marketEst)]].filter(([,v])=>v&&v!=='—');
+    document.getElementById('v-specs').innerHTML=specs.map(([k,v])=>'<div class="spec-row"><span class="spec-k">'+k+'</span><span class="spec-v">'+v+'</span></div>').join('');
 
-  }catch(e){
-    showError('Connection error. Check your internet and try again.');
-    setStep(1,'error','Connection failed');
-  }
+    showEl('vehicle-card');showEl('bid-card');
+    setTimeout(()=>document.getElementById('vehicle-card').scrollIntoView({behavior:'smooth',block:'start'}),100);
+
+  }catch(e){showErr('Connection error. Check your internet and try again.');setDot(1,'error','Connection failed');}
   btn.disabled=false;btn.textContent='Analyze';
 }
 
-function renderVehicle(){
-  const d=vData;
-  document.getElementById('v-name').textContent=d.year+' '+d.make+' '+d.model+(d.trim?' '+d.trim:'');
-  document.getElementById('v-tags').innerHTML='<span class="tag tag-lime">'+d.body+'</span><span class="tag tag-blue">'+d.engine+'</span><span class="tag tag-green">Est. '+fmt(vData.marketLow)+' – '+fmt(vData.marketHigh)+'</span>';
-  const specs=[['Engine',d.engine],['Fuel',d.fuel],['Drive',d.drive],['Transmission',d.transmission],['Doors',d.doors],['Assembly',d.plant],['Market est.',fmt(vData.marketEst)]].filter(([,v])=>v&&v!=='—');
-  document.getElementById('v-specs').innerHTML=specs.map(([k,v])=>'<div class="spec-row"><span class="spec-key">'+k+'</span><span class="spec-val">'+v+'</span></div>').join('');
+async function incrementUsage(){
+  const token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token');
+  if(!token)return;
+  const raw=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  if(!raw)return;
+  const u=JSON.parse(raw);
+  const month=new Date().toISOString().slice(0,7);
+  analysesUsed++;
+  // Update usage bar
+  const limit=PLAN_LIMITS[userPlan];
+  const pct=Math.min(100,(analysesUsed/limit)*100);
+  document.getElementById('usage-txt').textContent=analysesUsed+' / '+limit;
+  const fill=document.getElementById('usage-fill');
+  fill.style.width=pct+'%';
+  fill.className='usage-fill'+(pct>=100?' full':pct>=80?' warn':'');
+  try{
+    const check=await fetch(SUPABASE_URL+'/rest/v1/user_usage?user_id=eq.'+u.id+'&month=eq.'+month+'&select=id,analyses_count',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+token}});
+    const cd=await check.json();
+    if(cd&&cd.length){
+      await fetch(SUPABASE_URL+'/rest/v1/user_usage?user_id=eq.'+u.id+'&month=eq.'+month,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+token,'Prefer':'return=minimal'},body:JSON.stringify({analyses_count:cd[0].analyses_count+1})});
+    }else{
+      await fetch(SUPABASE_URL+'/rest/v1/user_usage',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+token,'Prefer':'return=minimal'},body:JSON.stringify({user_id:u.id,month,analyses_count:1,plan:userPlan,plsn:userPlan})});
+    }
+  }catch(e){}
 }
 
 const dmgRisk={'Front end':2,'Rear end':1,'Side':2,'Rollover':4,'Flood / water':5,'Fire':5,'Hail':1,'Mechanical':3,'Minor dents / scratches':1};
 const titleRisk={Clean:0,Salvage:3,Rebuilt:1,'Parts only':5,'Certificate of destruction':5};
 
-async function analyze(){
-  const titleType=document.getElementById('title-type').value;
+function analyze(){
+  const title=document.getElementById('title-type').value;
   const damage=document.getElementById('damage').value;
   const bid=parseFloat(document.getElementById('bid').value)||3000;
   const repair=parseFloat(document.getElementById('repair').value)||2000;
@@ -591,165 +383,62 @@ async function analyze(){
   const margin=market-total;
   const roi=(margin/total)*100;
   const dr=damage?(dmgRisk[damage]||2):0;
-  const tr=titleRisk[titleType]||0;
-  const riskScore=dr+tr+(margin<0?3:0)+(roi>0&&roi<10?1:0);
+  const tr=titleRisk[title]||0;
+  const risk=dr+tr+(margin<0?3:0)+(roi>0&&roi<10?1:0);
 
-  let vClass,vTitle,vSub,mc;
-  if(margin>2000&&roi>15&&riskScore<=3){vClass='deal';vTitle='Deal';vSub='Solid margin with manageable risk';mc='lime';}
-  else if(margin>0&&riskScore<=5){vClass='neutral';vTitle='Neutral';vSub='Tight margin or elevated risk';mc='amber';}
-  else{vClass='trap';vTitle='Trap';vSub="Numbers don't work — pass on this lot";mc='red';}
+  let vc,vt,vs,mc;
+  if(margin>2000&&roi>15&&risk<=3){vc='deal';vt='Deal';vs='Solid margin with manageable risk';mc='lime';}
+  else if(margin>0&&risk<=5){vc='neutral';vt='Neutral';vs='Tight margin or elevated risk';mc='amber';}
+  else{vc='trap';vt='Trap';vs="Numbers don't work — pass on this lot";mc='red';}
 
-  document.getElementById('verdict-box').className='verdict-card v-'+vClass;
-  document.getElementById('v-icon').textContent={deal:'✓',neutral:'~',trap:'✕'}[vClass];
-  document.getElementById('v-icon').className='verdict-icon vi-'+vClass;
-  document.getElementById('v-verdict').textContent=vTitle;
-  document.getElementById('v-verdict').className='verdict-title vt-'+vClass;
-  document.getElementById('v-sub').textContent=vSub;
+  document.getElementById('verdict-box').className='verdict-box v-'+vc;
+  document.getElementById('v-icon').textContent={deal:'✓',neutral:'~',trap:'✕'}[vc];
+  document.getElementById('v-icon').className='vicon vi-'+vc;
+  document.getElementById('v-verdict').textContent=vt;
+  document.getElementById('v-verdict').className='vtitle vt-'+vc;
+  document.getElementById('v-sub').textContent=vs;
 
-  const mVal='mv-'+(margin>=0?mc:'red');
   document.getElementById('m-total').textContent=fmt(total);
   document.getElementById('m-margin').textContent=(margin>=0?'+':'')+fmt(margin);
-  document.getElementById('m-margin').className='metric-val mv-'+mc;
+  document.getElementById('m-margin').className='mval c-'+mc;
   document.getElementById('m-roi').textContent=fmtP(roi);
-  document.getElementById('m-roi').className='metric-val mv-'+mc;
+  document.getElementById('m-roi').className='mval c-'+mc;
 
-  document.getElementById('breakdown').innerHTML=[
-    ['Vehicle',vData.year+' '+vData.make+' '+vData.model],
-    ['VIN',vData.vin],['Damage',damage||'None'],['Title',titleType],
-    ['Bid',fmt(bid)],['Auction fees (~12%)',fmt(fees)],
-    ['Repair',fmt(repair)],['Transport',fmt(transport)],
-    ['Total cost',fmt(total)],['Market value',fmt(market)],
-    ['Margin',(margin>=0?'+':'')+fmt(margin)]
-  ].map(([k,v])=>'<div class="spec-row"><span class="spec-key">'+k+'</span><span class="spec-val">'+v+'</span></div>').join('');
+  document.getElementById('breakdown').innerHTML=[['Vehicle',vData.year+' '+vData.make+' '+vData.model],['VIN',vData.vin],['Damage',damage||'None'],['Title',title],['Bid',fmt(bid)],['Fees (~12%)',fmt(fees)],['Repair',fmt(repair)],['Transport',fmt(transport)],['Total',fmt(total)],['Market',fmt(market)],['Margin',(margin>=0?'+':'')+fmt(margin)]].map(([k,v])=>'<div class="spec-row"><span class="spec-k">'+k+'</span><span class="spec-v">'+v+'</span></div>').join('');
 
   const risks=[];
-  if(tr>=3)risks.push({c:'red',t:titleType+' title — complicates resale, requires additional processing'});
-  else if(tr>=1)risks.push({c:'amber',t:titleType+' title — affects resale price'});
-  if(dr>=4)risks.push({c:'red',t:damage+' damage — high risk of hidden structural or electrical damage'});
-  else if(dr>=2)risks.push({c:'amber',t:damage+' damage — repair costs may vary, get a quote first'});
-  if(margin<0)risks.push({c:'red',t:'Negative margin of '+fmt(Math.abs(margin))+' — you would lose money'});
-  if(roi>0&&roi<15)risks.push({c:'amber',t:'ROI of '+fmtP(roi)+' — tight margin to absorb surprises'});
-  if(risks.length===0)risks.push({c:'green',t:'No major red flags detected'});
-  document.getElementById('risks').innerHTML=risks.map(r=>'<div class="risk-item"><div class="risk-dot rd-'+r.c+'"></div><span>'+r.t+'</span></div>').join('');
+  if(tr>=3)risks.push({c:'red',t:title+' title — complicates resale'});
+  else if(tr>=1)risks.push({c:'amber',t:title+' title — affects resale price'});
+  if(dr>=4)risks.push({c:'red',t:damage+' — high risk of hidden damage'});
+  else if(dr>=2)risks.push({c:'amber',t:damage+' — get a repair quote first'});
+  if(margin<0)risks.push({c:'red',t:'Negative margin of '+fmt(Math.abs(margin))});
+  if(roi>0&&roi<15)risks.push({c:'amber',t:'ROI of '+fmtP(roi)+' — thin margin'});
+  if(!risks.length)risks.push({c:'lime',t:'No major red flags detected'});
+  document.getElementById('risks').innerHTML=risks.map(r=>'<div class="risk-item"><div class="rdot rd-'+r.c+'"></div><span>'+r.t+'</span></div>').join('');
 
-  const aiMap={
-    deal:'This lot makes sense. With a '+fmt(margin)+' margin and '+fmtP(roi)+' ROI, you have enough cushion to absorb surprises. The '+vData.year+' '+vData.make+' '+vData.model+' has solid demand in the private market. Verify structure and mechanical condition before bidding.',
-    neutral:'This lot is in the gray zone. The '+fmt(margin)+' margin exists but is tight — any repair surprise can eliminate it. '+(tr>=3?titleType+' title adds cost and processing time. ':'')+'Only makes sense if you have your own shop or can sell above market.',
-    trap:"This lot doesn't work. "+(margin<0?'You would pay '+fmt(Math.abs(margin))+' more than the market value.':'Accumulated risk exceeds available margin.')+' To make this work, lower your bid to around '+fmt(Math.max(500,bid-Math.abs(margin)-800))+'.'
-  };
-  document.getElementById('ai-text').textContent=aiMap[vClass];
+  const ai={deal:'This lot makes sense. With '+fmt(margin)+' margin at '+fmtP(roi)+' ROI, you have enough cushion. Verify structure and mechanical condition before bidding.',neutral:'Borderline deal. The '+fmt(margin)+' margin is thin — any surprise repair can eliminate it. Only bid if you can sell above market.',trap:'This lot does not work. '+(margin<0?'You would lose '+fmt(Math.abs(margin))+' at current market value.':'Risk exceeds margin.')+' Lower your bid to around '+fmt(Math.max(500,bid-Math.abs(margin)-800))+' to make it work.'};
+  document.getElementById('ai-text').textContent=ai[vc];
 
   // Save to Supabase
-  if(currentUser){
+  const token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token');
+  const raw=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');
+  if(token&&raw){
     try{
-      const token=localStorage.getItem('ae_token')||sessionStorage.getItem('ae_token')||SUPABASE_KEY;
-      await fetch(SUPABASE_URL+'/rest/v1/analyses',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+token,'Prefer':'return=minimal'},
-        body:JSON.stringify({user_id:currentUser.id,vin:vData.vin,vehicle:vData.year+' '+vData.make+' '+vData.model,year:vData.year,make:vData.make,model:vData.model,engine:vData.engine,transmission:vData.transmission,drive:vData.drive,fuel:vData.fuel,damage,title_type:titleType,bid,repair,market,total_cost:total,margin,roi:Math.round(roi),verdict:vTitle})
-      });
-    }catch(e){console.log('Save error:',e);}
+      const u=JSON.parse(raw);
+      fetch(SUPABASE_URL+'/rest/v1/analyses',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+token,'Prefer':'return=minimal'},body:JSON.stringify({user_id:u.id,vin:vData.vin,vehicle:vData.year+' '+vData.make+' '+vData.model,year:vData.year,make:vData.make,model:vData.model,engine:vData.engine,transmission:vData.transmission,drive:vData.drive,fuel:vData.fuel,damage,title_type:title,bid,repair,market,total_cost:total,margin,roi:Math.round(roi),verdict:vt})});
+    }catch(e){}
   }
 
   showEl('results');
-  setTimeout(()=>{document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});},100);
-}
-
-// AUTH
-let currentTab='signin';
-function openAuth(tab){const stored=localStorage.getItem('ae_user')||sessionStorage.getItem('ae_user');if(stored){window.location.href='/dashboard.html';return;}switchTab(tab);document.getElementById('auth-modal').classList.add('show');}
-function closeAuth(){document.getElementById('auth-modal').classList.remove('show');}
-function switchTab(tab){
-  currentTab=tab;
-  document.getElementById('tab-signin').className='auth-tab'+(tab==='signin'?' active':'');
-  document.getElementById('tab-signup').className='auth-tab'+(tab==='signup'?' active':'');
-  document.getElementById('signin-fields').style.display=tab==='signin'?'block':'none';
-  document.getElementById('signup-fields').style.display=tab==='signup'?'block':'none';
-  document.getElementById('auth-btn').textContent=tab==='signin'?'Sign in':'Create account';
-  document.getElementById('auth-switch').innerHTML=tab==='signin'?'Don't have an account? <span onclick="switchTab('signup')">Sign up free</span>':'Already have an account? <span onclick="switchTab('signin')">Sign in</span>';
-  document.getElementById('auth-error').style.display='none';
-  document.getElementById('auth-success').style.display='none';
-}
-
-async function handleAuth(){
-  const btn=document.getElementById('auth-btn');
-  const err=document.getElementById('auth-error');
-  const suc=document.getElementById('auth-success');
-  err.style.display='none';suc.style.display='none';
-  btn.disabled=true;btn.textContent='Please wait...';
-  try{
-    if(currentTab==='signin'){
-      let login=document.getElementById('si-login').value.trim();
-      const password=document.getElementById('si-password').value;
-      const remember=document.getElementById('si-remember').checked;
-      if(!login){err.textContent='Enter your email or username.';err.style.display='block';btn.disabled=false;btn.textContent='Sign in';return;}
-      if(!password||password.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';btn.disabled=false;btn.textContent='Sign in';return;}
-      let email=login;
-      if(!login.includes('@')){
-        const r=await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+login.toLowerCase()+'&select=email',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
-        const d=await r.json();
-        if(!d||!d.length){err.textContent='Username not found.';err.style.display='block';btn.disabled=false;btn.textContent='Sign in';return;}
-        email=d[0].email;
-      }
-      const res=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
-      const data=await res.json();
-      if(!res.ok)throw new Error(data.error_description||'Wrong email or password');
-      const pRes=await fetch(SUPABASE_URL+'/rest/v1/profiles?id=eq.'+data.user.id+'&select=*',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+data.access_token}});
-      const pData=await pRes.json();
-      const profile=pData&&pData.length?pData[0]:{};
-      const user={...data.user,...profile};
-      if(remember){localStorage.setItem('ae_token',data.access_token);localStorage.setItem('ae_user',JSON.stringify(user));}
-      else{sessionStorage.setItem('ae_token',data.access_token);sessionStorage.setItem('ae_user',JSON.stringify(user));}
-      currentUser=user;
-      await loadUserData();
-      renderNav();
-      closeAuth();
-    }else{
-      const firstName=document.getElementById('su-firstname').value.trim();
-      const lastName=document.getElementById('su-lastname').value.trim();
-      const username=document.getElementById('su-username').value.trim().toLowerCase();
-      const gender=document.getElementById('su-gender').value;
-      const email=document.getElementById('su-email').value.trim();
-      const password=document.getElementById('su-password').value;
-      if(!firstName){err.textContent='Enter your first name.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';return;}
-      if(!lastName){err.textContent='Enter your last name.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';return;}
-      if(!username||username.length<3){err.textContent='Username must be at least 3 characters.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';return;}
-      if(!/^[a-z0-9_]+$/.test(username)){err.textContent='Username: letters, numbers and underscores only.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';return;}
-      if(!gender){err.textContent='Please select your gender.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';return;}
-      if(!email||!email.includes('@')){err.textContent='Enter a valid email.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';return;}
-      if(!password||password.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';return;}
-      const chk=await fetch(SUPABASE_URL+'/rest/v1/profiles?username=eq.'+username+'&select=id',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
-      const chkD=await chk.json();
-      if(chkD&&chkD.length>0){err.textContent='Username already taken.';err.style.display='block';btn.disabled=false;btn.textContent='Create account';return;}
-      const signupRes=await fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
-      const signupData=await signupRes.json();
-      if(!signupRes.ok)throw new Error(signupData.error_description||'Signup failed');
-      const siRes=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},body:JSON.stringify({email,password})});
-      const siData=await siRes.json();
-      if(siRes.ok&&siData.access_token){
-        await fetch(SUPABASE_URL+'/rest/v1/profiles',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+siData.access_token,'Prefer':'return=minimal'},body:JSON.stringify({id:siData.user.id,first_name:firstName,last_name:lastName,username,gender,email})});
-        const user={...siData.user,first_name:firstName,last_name:lastName,username,gender};
-        localStorage.setItem('ae_token',siData.access_token);localStorage.setItem('ae_user',JSON.stringify(user));
-        currentUser=user;await loadUserData();renderNav();closeAuth();
-      }else{suc.textContent='Account created! You can now sign in.';suc.style.display='block';switchTab('signin');}
-    }
-  }catch(e){
-    err.textContent=e.message||'Something went wrong.';err.style.display='block';
-  }
-  btn.disabled=false;btn.textContent=currentTab==='signin'?'Sign in':'Create account';
+  setTimeout(()=>document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
 
 async function signOut(){
-  localStorage.removeItem('ae_user');localStorage.removeItem('ae_token');
-  sessionStorage.removeItem('ae_user');sessionStorage.removeItem('ae_token');
-  currentUser=null;userPlan='free';analysesUsed=0;
-  renderNav();
+  localStorage.clear();sessionStorage.clear();
   window.location.href='/index.html';
 }
 
-document.getElementById('auth-modal').addEventListener('click',function(e){if(e.target===this)closeAuth();});
-
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});}
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 </body>
 </html>
